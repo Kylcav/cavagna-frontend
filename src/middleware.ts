@@ -98,30 +98,34 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.redirect(redirectUrl, 307)
 
-  let cacheIdCookie = request.cookies.get("_medusa_cache_id")
+  const cacheIdCookie = request.cookies.get("_medusa_cache_id")
 
-  let cacheId = cacheIdCookie?.value || crypto.randomUUID()
+  const cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
   const regionMap = await getRegionMap(cacheId)
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
+  const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+
   const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+    countryCode && urlCountryCode === countryCode
 
   if (urlHasCountryCode && cacheIdCookie) {
     return NextResponse.next()
   }
 
   if (urlHasCountryCode && !cacheIdCookie) {
-    response.cookies.set("_medusa_cache_id", cacheId, {
+    const nextResponse = NextResponse.next()
+
+    nextResponse.cookies.set("_medusa_cache_id", cacheId, {
       maxAge: 60 * 60 * 24,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
     })
 
-    return response
+    return nextResponse
   }
 
   if (request.nextUrl.pathname.includes(".")) {
