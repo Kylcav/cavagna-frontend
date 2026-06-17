@@ -3,6 +3,7 @@
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { fbq } from "@lib/meta-pixel"
+import { ttqTrack } from "@lib/tiktok-pixel"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
@@ -128,6 +129,11 @@ export default function ProductActions({
       })
 
       const calculatedPrice = selectedVariant.calculated_price
+      const value = calculatedPrice?.calculated_amount
+      const currency =
+        calculatedPrice?.currency_code?.toUpperCase() ||
+        product.variants?.[0]?.calculated_price?.currency_code?.toUpperCase() ||
+        "CHF"
 
       fbq("AddToCart", {
         content_ids: [selectedVariant.id],
@@ -137,14 +143,28 @@ export default function ProductActions({
           {
             id: selectedVariant.id,
             quantity: 1,
-            item_price: calculatedPrice?.calculated_amount,
+            item_price: value,
           },
         ],
-        value: calculatedPrice?.calculated_amount,
-        currency:
-          calculatedPrice?.currency_code?.toUpperCase() ||
-          product.variants?.[0]?.calculated_price?.currency_code?.toUpperCase() ||
-          "CHF",
+        value,
+        currency,
+      })
+
+      ttqTrack("AddToCart", {
+        content_id: selectedVariant.id,
+        content_name: product.title,
+        content_type: "product",
+        contents: [
+          {
+            content_id: selectedVariant.id,
+            content_name: product.title,
+            content_type: "product",
+            quantity: 1,
+            price: value,
+          },
+        ],
+        value,
+        currency,
       })
 
       router.push(`/${countryCode}/cart`)

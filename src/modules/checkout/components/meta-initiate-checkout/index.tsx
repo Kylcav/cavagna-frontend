@@ -1,8 +1,9 @@
 "use client"
 
-import { fbq } from "@lib/meta-pixel"
-import { HttpTypes } from "@medusajs/types"
 import { useEffect } from "react"
+import { fbq } from "@lib/meta-pixel"
+import { ttqTrack } from "@lib/tiktok-pixel"
+import { HttpTypes } from "@medusajs/types"
 
 export default function MetaInitiateCheckout({
   cart,
@@ -10,6 +11,10 @@ export default function MetaInitiateCheckout({
   cart: HttpTypes.StoreCart
 }) {
   useEffect(() => {
+    const value = cart.total
+    const currency = cart.currency_code?.toUpperCase() || "CHF"
+
+    // Meta
     fbq("InitiateCheckout", {
       content_ids: cart.items?.map((item) => item.variant_id) || [],
       content_type: "product",
@@ -19,9 +24,23 @@ export default function MetaInitiateCheckout({
           quantity: item.quantity,
           item_price: item.unit_price,
         })) || [],
-      value: cart.total,
-      currency: cart.currency_code?.toUpperCase() || "CHF",
-      num_items: cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+      value,
+      currency,
+      num_items:
+        cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+    })
+
+    // TikTok
+    ttqTrack("InitiateCheckout", {
+      contents:
+        cart.items?.map((item) => ({
+          content_id: item.variant_id,
+          content_type: "product",
+          quantity: item.quantity,
+          price: item.unit_price,
+        })) || [],
+      value,
+      currency,
     })
   }, [cart])
 

@@ -1,8 +1,9 @@
 "use client"
 
-import { fbq } from "@lib/meta-pixel"
-import { HttpTypes } from "@medusajs/types"
 import { useEffect } from "react"
+import { fbq } from "@lib/meta-pixel"
+import { ttqTrack } from "@lib/tiktok-pixel"
+import { HttpTypes } from "@medusajs/types"
 
 export default function MetaPurchase({
   order,
@@ -16,6 +17,8 @@ export default function MetaPurchase({
     sessionStorage.setItem(storageKey, "true")
 
     const eventId = `purchase_${order.id}`
+    const value = order.total
+    const currency = order.currency_code?.toUpperCase() || "CHF"
 
     fbq(
       "Purchase",
@@ -28,17 +31,33 @@ export default function MetaPurchase({
             quantity: item.quantity,
             item_price: item.unit_price,
           })) || [],
-        value: order.total,
-        currency: order.currency_code?.toUpperCase() || "CHF",
+        value,
+        currency,
         num_items:
-          order.items?.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          ) || 0,
+          order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0,
         order_id: order.id,
       },
       {
         eventID: eventId,
+      }
+    )
+
+    ttqTrack(
+      "CompletePayment",
+      {
+        contents:
+          order.items?.map((item) => ({
+            content_id: item.variant_id,
+            content_type: "product",
+            quantity: item.quantity,
+            price: item.unit_price,
+          })) || [],
+        value,
+        currency,
+        order_id: order.id,
+      },
+      {
+        event_id: eventId,
       }
     )
   }, [order])
