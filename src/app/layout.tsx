@@ -28,20 +28,23 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           strategy="beforeInteractive"
         />
 
-        <Script id="matomo-config" strategy="beforeInteractive">
-          {`
-            window._paq = window._paq || [];
-            window._paq.push(['setTrackerUrl', 'https://mizucat.matomo.cloud/matomo.php']);
-            window._paq.push(['setSiteId', '1']);
-            window._paq.push(['enableLinkTracking']);
-            window._paq.push(['trackPageView']);
-          `}
-        </Script>
-
-        <Script
-          id="matomo-script"
-          src="https://cdn.matomo.cloud/mizucat.matomo.cloud/matomo.js"
-          strategy="beforeInteractive"
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _paq = window._paq = window._paq || [];
+              _paq.push(['trackPageView']);
+              _paq.push(['enableLinkTracking']);
+              (function() {
+                var u="https://mizucat.matomo.cloud/";
+                _paq.push(['setTrackerUrl', u+'matomo.php']);
+                _paq.push(['setSiteId', '1']);
+                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+                g.async=true;
+                g.src='https://cdn.matomo.cloud/mizucat.matomo.cloud/matomo.js';
+                s.parentNode.insertBefore(g,s);
+              })();
+            `,
+          }}
         />
 
         <Script id="meta-pixel" strategy="beforeInteractive">
