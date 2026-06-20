@@ -21,14 +21,14 @@ export const metadata: Metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="fr" data-mode="light">
-      <body>
+      <head>
         <Script
           id="contentsquare-tag"
           src={CONTENTSQUARE_TAG_URL}
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
 
-        <Script id="matomo-tag" strategy="afterInteractive">
+        <Script id="matomo-tag" strategy="beforeInteractive">
           {`
             var _paq = window._paq = window._paq || [];
             _paq.push(['trackPageView']);
@@ -45,12 +45,12 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           `}
         </Script>
 
-        <Script id="meta-pixel" strategy="afterInteractive">
+        <Script id="meta-pixel" strategy="beforeInteractive">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            if(!f._fbq)f._fbq=n;n.push=n.loaded=!0;n.version='2.0';
             n.queue=[];t=b.createElement(e);t.async=!0;
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
@@ -60,7 +60,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           `}
         </Script>
 
-        <Script id="tiktok-pixel" strategy="afterInteractive">
+        <Script id="tiktok-pixel" strategy="beforeInteractive">
           {`
             !function (w, d, t) {
               w.TiktokAnalyticsObject=t;
@@ -105,7 +105,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             }(window, document, 'ttq');
           `}
         </Script>
+      </head>
 
+      <body>
         <Suspense fallback={null}>
           <MetaPageView />
         </Suspense>
