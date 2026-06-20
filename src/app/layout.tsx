@@ -29,21 +29,23 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         />
 
         <Script id="matomo-tag" strategy="beforeInteractive">
-          {`
-            var _paq = window._paq = window._paq || [];
-            _paq.push(['trackPageView']);
-            _paq.push(['enableLinkTracking']);
-            (function() {
-              var u="https://mizucat.matomo.cloud/";
-              _paq.push(['setTrackerUrl', u+'matomo.php']);
-              _paq.push(['setSiteId', '1']);
-              var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-              g.async=true;
-              g.src='https://cdn.matomo.cloud/mizucat.matomo.cloud/matomo.js';
-              s.parentNode.insertBefore(g,s);
-            })();
-          `}
-        </Script>
+  {`
+    var _paq = window._paq = window._paq || [];
+    _paq.push(['setTrackerUrl', 'https://mizucat.matomo.cloud/matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    _paq.push(['enableLinkTracking']);
+    _paq.push(['trackPageView']);
+
+    (function() {
+      var d=document;
+      var g=d.createElement('script');
+      var s=d.getElementsByTagName('script')[0];
+      g.async=true;
+      g.src='https://cdn.matomo.cloud/mizucat.matomo.cloud/matomo.js';
+      s.parentNode.insertBefore(g,s);
+    })();
+  `}
+</Script>
 
         <Script id="meta-pixel" strategy="beforeInteractive">
           {`
