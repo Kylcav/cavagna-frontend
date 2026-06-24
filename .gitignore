@@ -56,3 +56,9 @@ dump.rdb
 /blob-report/
 /playwright/.cache/
 /playwright/.auth
+node_modules/
+.next/
+dist/
+build/
+.env
+.env.*
