@@ -21,43 +21,32 @@ const StoreTemplate = async ({
   const sort = sortBy || "created_at"
 
   const categories = await listCategories({ limit: 100 })
-    .then((categories) => {
-      console.log(
-        "CATEGORIES MEDUSA:",
-        categories.map((c) => ({
-          id: c.id,
-          name: c.name,
-          handle: c.handle,
-          parent: c.parent_category,
-        }))
-      )
-
-      return categories
+    .then((categories) =>
+      categories
         .filter((category) => !category.parent_category)
         .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
-    })
-    .catch((err) => {
-      console.error("ERREUR CATEGORIES:", err)
-      return []
-    })
+    )
+    .catch(() => [])
 
   return (
     <div className="py-6 content-container" data-testid="category-container">
       {categories.length > 0 && (
-        <div className="mb-10 overflow-x-auto">
-          <nav className="flex w-max min-w-full items-center justify-center gap-10 border-b border-black/10 pb-4">
-            {categories.map((category) => (
-              <LocalizedClientLink
-                key={category.id}
-                href={`/categories/${category.handle}`}
-                className="whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#171412] transition-colors hover:text-black"
-              >
-                {category.name}
-              </LocalizedClientLink>
-            ))}
-          </nav>
-        </div>
-      )}
+  <div className="mb-10 overflow-x-auto">
+    <nav className="flex w-max min-w-full items-center justify-center gap-10 border-b border-black/10 pb-4">
+      {categories.map((category) => (
+        <LocalizedClientLink
+          key={category.id}
+          href={`/categories/${category.handle}`}
+          className="group relative whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#8a6f55] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:text-[#b08a68]"
+        >
+          {category.name}
+
+          <span className="absolute -bottom-2 left-1/2 h-px w-0 -translate-x-1/2 bg-[#b08a68] transition-all duration-300 ease-out group-hover:w-full" />
+        </LocalizedClientLink>
+      ))}
+    </nav>
+  </div>
+)}
 
       <div className="flex flex-col small:flex-row small:items-start">
         <RefinementList sortBy={sort} />
