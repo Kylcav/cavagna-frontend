@@ -14,12 +14,12 @@ export default function ConditionsGeneralesPage({
     {
       number: "02.",
       title: "Utilisation des données",
-      text: "Les données sont utilisées pour traiter les commandes, assurer la livraison, gérer le service client et améliorer l’expérience utilisateur.",
+      text: "Les données sont utilisées pour traiter les commandes, assurer la livraison, gérer le service client, répondre aux demandes liées aux produits CAVAGNA et améliorer l’expérience utilisateur sur notre boutique.",
     },
     {
       number: "03.",
       title: "Paiement",
-      text: "Les informations de paiement sont traitées par un prestataire sécurisé. MizuCat ne stocke pas directement les données complètes de carte bancaire.",
+      text: "Les informations de paiement sont traitées par un prestataire sécurisé. CAVAGNA ne stocke pas directement les données complètes de carte bancaire.",
     },
     {
       number: "04.",
@@ -29,7 +29,7 @@ export default function ConditionsGeneralesPage({
     {
       number: "05.",
       title: "Conservation des données",
-      text: "Les données sont conservées uniquement pendant la durée nécessaire au traitement des commandes, au support client et aux obligations légales applicables.",
+      text: "Les données sont conservées uniquement pendant la durée nécessaire au traitement des commandes, au support client, au suivi des produits et aux obligations légales applicables.",
     },
     {
       number: "06.",
@@ -40,14 +40,13 @@ export default function ConditionsGeneralesPage({
       number: "07.",
       title: "Contact",
       text: "Pour toute demande relative à vos données personnelles, contactez-nous à :",
-      email: "contact@mizucat.ch",
+      email: "contact@cavagna.shop",
     },
   ]
 
   return (
     <main className="min-h-screen bg-[#fbfaf8] text-[#171412]">
       <div className="mx-auto max-w-5xl px-6 py-14 small:px-10 small:py-20">
-        {/* TOP BAR */}
         <div className="mb-24 flex justify-end">
           <a
             href={`/${countryCode}/checkout?step=review`}
@@ -57,7 +56,6 @@ export default function ConditionsGeneralesPage({
           </a>
         </div>
 
-        {/* HERO */}
         <section className="mb-28 max-w-4xl">
           <p className="mb-6 text-sm font-semibold uppercase tracking-[0.22em] text-[#b08a68]">
             CONFIDENTIALITÉ & CONFIANCE
@@ -74,14 +72,11 @@ export default function ConditionsGeneralesPage({
           </p>
         </section>
 
-        {/* TRUST BLOCKS */}
         <section className="mb-24 grid gap-10 border-b border-[#eadfd5] pb-14 small:grid-cols-3">
           <div>
             <div className="mb-5 h-px w-16 bg-[#c7a589]" />
 
-            <h2 className="text-xl font-bold">
-              Données protégées
-            </h2>
+            <h2 className="text-xl font-bold">Données protégées</h2>
 
             <p className="mt-5 pb-4 text-base leading-8 text-[#665d57]">
               Vos informations sont utilisées uniquement pour traiter vos
@@ -92,21 +87,17 @@ export default function ConditionsGeneralesPage({
           <div>
             <div className="mb-5 h-px w-16 bg-[#c7a589]" />
 
-            <h2 className="text-xl font-bold">
-              Paiement sécurisé
-            </h2>
+            <h2 className="text-xl font-bold">Paiement sécurisé</h2>
 
             <p className="mt-5 pb-4 text-base leading-8 text-[#665d57]">
-              MizuCat ne stocke jamais vos données complètes de carte bancaire.
+              CAVAGNA ne stocke jamais vos données complètes de carte bancaire.
             </p>
           </div>
 
           <div>
             <div className="mb-5 h-px w-16 bg-[#c7a589]" />
 
-            <h2 className="text-xl font-bold">
-              Contrôle de vos données
-            </h2>
+            <h2 className="text-xl font-bold">Contrôle de vos données</h2>
 
             <p className="mt-5 pb-4 text-base leading-8 text-[#665d57]">
               Vous gardez la possibilité de demander l’accès, la modification ou
@@ -115,14 +106,12 @@ export default function ConditionsGeneralesPage({
           </div>
         </section>
 
-        {/* CONTENT */}
         <section>
           {sections.map((section) => (
             <article
               key={section.title}
               className="border-b border-[#eadfd5] py-14"
             >
-              {/* TITLE */}
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-extrabold tracking-tight text-[#b08a68] small:text-4xl">
                   {section.number}
@@ -133,7 +122,6 @@ export default function ConditionsGeneralesPage({
                 </h2>
               </div>
 
-              {/* TEXT */}
               <p className="mt-5 mb-6 max-w-4xl text-lg leading-9 text-[#5f5a55]">
                 {section.text}
               </p>

@@ -43,7 +43,7 @@ const Payment = ({
     setSelectedPaymentMethod(method)
 
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("mizucat_payment_method", method)
+      sessionStorage.setItem("cavagna_payment_method", method)
     }
 
     try {
@@ -105,8 +105,8 @@ const Payment = ({
       }
 
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("mizucat_payment_method", selectedPaymentMethod)
-        sessionStorage.setItem("mizucat_payment_label", cardBrand || "")
+        sessionStorage.setItem("cavagna_payment_method", selectedPaymentMethod)
+        sessionStorage.setItem("cavagna_payment_label", cardBrand || "")
       }
 
       router.push(pathname + "?" + createQueryString("step", "review"), {

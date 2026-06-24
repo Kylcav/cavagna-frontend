@@ -7,7 +7,6 @@ import "../styles/globals.css"
 
 const META_PIXEL_ID = "27024824927171752"
 const TIKTOK_PIXEL_ID = "D8PFD5RC77U1TIMDIU10"
-const CONTENTSQUARE_TAG_URL = "https://t.contentsquare.net/uxa/0b8c7765f297d.js"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -22,12 +21,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="fr" data-mode="light">
       <head>
-        <Script
-          id="contentsquare-tag"
-          src={CONTENTSQUARE_TAG_URL}
-          strategy="beforeInteractive"
-        />
-
         <Script id="meta-pixel" strategy="beforeInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -91,23 +84,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       </head>
 
       <body>
-        <Script id="matomo-tag" strategy="afterInteractive">
-          {`
-            var _paq = window._paq = window._paq || [];
-            _paq.push(['trackPageView']);
-            _paq.push(['enableLinkTracking']);
-            (function() {
-              var u="https://mizucat.matomo.cloud/";
-              _paq.push(['setTrackerUrl', u+'matomo.php']);
-              _paq.push(['setSiteId', '1']);
-              var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-              g.async=true;
-              g.src='https://cdn.matomo.cloud/mizucat.matomo.cloud/matomo.js';
-              s.parentNode.insertBefore(g,s);
-            })();
-          `}
-        </Script>
-
         <Suspense fallback={null}>
           <MetaPageView />
         </Suspense>

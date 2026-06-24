@@ -9,7 +9,7 @@ export default async function Nav() {
         <nav className="content-container flex h-full items-center justify-between text-xs font-semibold text-[#171412]">
           
           <LocalizedClientLink href="/" className="text-base font-bold">
-            MizuCat
+            CAVAGNA
           </LocalizedClientLink>
 
           <div className="flex items-center gap-4">

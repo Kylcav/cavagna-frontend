@@ -12,12 +12,12 @@ export default async function Footer() {
               href="/"
               className="text-2xl font-bold tracking-tight text-[#171412]"
             >
-              MizuCat
+              CAVAGNA
             </LocalizedClientLink>
 
             <p className="mt-4 text-sm leading-7 text-[#6b625c] max-w-sm">
-              Hydratation intelligente pour chats d’intérieur. Design premium,
-              livraison rapide et confort quotidien pour votre compagnon.
+              Des maillots de bain d’exception, fabriqués et cousus main en Suisse.
+              Chaque pièce allie élégance, artisanat et détails précieux.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export default async function Footer() {
         <div className="mt-16 border-t border-[#ebe4dc] pt-8">
           <div className="flex flex-col small:flex-row items-center justify-between gap-6">
             <Text className="text-sm text-[#7a716b]">
-              © {new Date().getFullYear()} MizuCat. Tous droits réservés.
+              © {new Date().getFullYear()} CAVAGNA. Tous droits réservés.
             </Text>
 
             <div className="flex flex-col small:flex-row items-center gap-3 small:gap-6 text-sm text-[#7a716b]">
