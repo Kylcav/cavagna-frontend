@@ -8,6 +8,7 @@ import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
+import SavoirFaireReveal from "@modules/layout/components/savoir-faire-reveal"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -20,13 +21,13 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   if (cart) {
     const { shipping_options } = await listCartOptions()
-
     shippingOptions = shipping_options
   }
 
   return (
     <>
       <Nav />
+
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
@@ -38,8 +39,12 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
+
       {props.children}
+
       <Footer />
+
+<SavoirFaireReveal />
     </>
   )
 }

@@ -1,12 +1,18 @@
-import { Text } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 export default async function Footer() {
   return (
-    <footer className="w-full border-t border-[#ebe4dc] bg-white mt-20">
-      <div className="mx-auto w-full max-w-5xl px-24 py-20">
-        <div className="flex flex-col md:flex-row items-start">
-          <div className="w-[420px] pl-20">
+    <footer className="w-full bg-white mt-20">
+
+      {/* Bande blanche du haut */}
+      <div className="border-t border-[#ebe4dc]" />
+
+      {/* Contenu */}
+      <div className="w-full py-12">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-20 text-center md:flex-row md:items-start md:justify-center">
+
+          {/* Colonne gauche */}
+          <div className="flex w-full max-w-md flex-col items-center text-center">
             <LocalizedClientLink
               href="/"
               className="text-[24px] font-bold tracking-tight text-[#171412]"
@@ -22,7 +28,8 @@ export default async function Footer() {
             </div>
           </div>
 
-          <div className="w-[320px] ml-auto pr-20">
+          {/* Colonne droite */}
+          <div className="flex w-full max-w-md flex-col items-center text-center">
             <h3 className="text-[15px] font-bold uppercase tracking-[0.22em] text-[#8a6f55]">
               INFORMATIONS
             </h3>
@@ -34,21 +41,13 @@ export default async function Footer() {
               <li>Garantie satisfaction</li>
             </ul>
           </div>
-        </div>
 
-        <div className="mt-24 border-t border-[#ebe4dc]" />
-
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8">
-          <Text className="text-[15px] text-[#7a716b]">
-            © {new Date().getFullYear()} CAVAGNA. Tous droits réservés.
-          </Text>
-
-          <div className="flex items-center gap-8 text-[15px] text-[#7a716b]">
-            <span>CHF</span>
-            <span>Suisse</span>
-          </div>
         </div>
       </div>
+
+      {/* Bande blanche du bas */}
+      <div className="border-t border-[#ebe4dc]" />
+
     </footer>
   )
 }
