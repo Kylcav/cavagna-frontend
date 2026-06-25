@@ -1,56 +1,33 @@
 import { Text } from "@medusajs/ui"
-
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 export default async function Footer() {
   return (
-    <footer className="border-t border-[#ebe4dc] bg-white w-full mt-20">
-      <div className="content-container py-16">
-        <div className="grid grid-cols-1 small:grid-cols-3 gap-10">
-          <div>
+    <footer className="w-full border-t border-[#ebe4dc] bg-white mt-20">
+      <div className="mx-auto w-full max-w-5xl px-24 py-20">
+        <div className="flex flex-col md:flex-row items-start">
+          <div className="w-[420px] pl-20">
             <LocalizedClientLink
               href="/"
-              className="text-2xl font-bold tracking-tight text-[#171412]"
+              className="text-[24px] font-bold tracking-tight text-[#171412]"
             >
               CAVAGNA
             </LocalizedClientLink>
 
-            <p className="mt-4 text-sm leading-7 text-[#6b625c] max-w-sm">
-              Des maillots de bain d’exception, fabriqués et cousus main en Suisse.
-              Chaque pièce allie élégance, artisanat et détails précieux.
-            </p>
+            <div className="mt-10 flex flex-col gap-5 text-[18px] leading-8 text-[#5f5a55]">
+              <p>Des maillots de bain d&apos;exception,</p>
+              <p>fabriqués et cousus main en Suisse.</p>
+              <p>Chaque pièce allie élégance,</p>
+              <p>artisanat et détails précieux.</p>
+            </div>
           </div>
 
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-[#8a6f55]">
-              Navigation
+          <div className="w-[320px] ml-auto pr-20">
+            <h3 className="text-[15px] font-bold uppercase tracking-[0.22em] text-[#8a6f55]">
+              INFORMATIONS
             </h3>
 
-            <ul className="mt-4 flex flex-col gap-3 text-sm text-[#5f5a55]">
-              <li>
-                <LocalizedClientLink href="/" className="hover:text-black transition">
-                  Accueil
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink href="/store" className="hover:text-black transition">
-                  Boutique
-                </LocalizedClientLink>
-              </li>
-              <li>
-                <LocalizedClientLink href="/cart" className="hover:text-black transition">
-                  Panier
-                </LocalizedClientLink>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-[#8a6f55]">
-              Informations
-            </h3>
-
-            <ul className="mt-4 flex flex-col gap-3 text-sm text-[#5f5a55]">
+            <ul className="mt-10 flex flex-col gap-5 text-[18px] leading-8 text-[#5f5a55]">
               <li>Livraison rapide Suisse</li>
               <li>Paiement sécurisé</li>
               <li>Support client 7j/7</li>
@@ -59,18 +36,16 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-[#ebe4dc] pt-8">
-          <div className="flex flex-col small:flex-row items-center justify-between gap-6">
-            <Text className="text-sm text-[#7a716b]">
-              © {new Date().getFullYear()} CAVAGNA. Tous droits réservés.
-            </Text>
+        <div className="mt-24 border-t border-[#ebe4dc]" />
 
-            <div className="flex flex-col small:flex-row items-center gap-3 small:gap-6 text-sm text-[#7a716b]">
-              <div className="flex items-center gap-4">
-                <span className="font-medium">CHF</span>
-                <span className="font-medium">Suisse</span>
-              </div>
-            </div>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8">
+          <Text className="text-[15px] text-[#7a716b]">
+            © {new Date().getFullYear()} CAVAGNA. Tous droits réservés.
+          </Text>
+
+          <div className="flex items-center gap-8 text-[15px] text-[#7a716b]">
+            <span>CHF</span>
+            <span>Suisse</span>
           </div>
         </div>
       </div>
