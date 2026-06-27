@@ -71,6 +71,15 @@ export default async function CategoryTemplate({
                 </LocalizedClientLink>
               )
             })}
+
+            <LocalizedClientLink
+              href="/notre-savoir-faire"
+              className="group relative whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#8a6f55] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:text-[#b08a68]"
+            >
+              NOTRE SAVOIR-FAIRE
+
+              <span className="absolute -bottom-2 left-1/2 h-px w-0 -translate-x-1/2 bg-[#b08a68] transition-all duration-300 ease-out group-hover:w-full" />
+            </LocalizedClientLink>
           </nav>
         </div>
       )}

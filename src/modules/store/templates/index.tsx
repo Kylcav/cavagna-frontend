@@ -31,22 +31,31 @@ const StoreTemplate = async ({
   return (
     <div className="py-6 content-container" data-testid="category-container">
       {categories.length > 0 && (
-  <div className="mb-10 overflow-x-auto">
-    <nav className="flex w-max min-w-full items-center justify-center gap-10 border-b border-black/10 pb-4">
-      {categories.map((category) => (
-        <LocalizedClientLink
-          key={category.id}
-          href={`/categories/${category.handle}`}
-          className="group relative whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#8a6f55] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:text-[#b08a68]"
-        >
-          {category.name}
+        <div className="mb-10 overflow-x-auto">
+          <nav className="flex w-max min-w-full items-center justify-center gap-10 border-b border-black/10 pb-4">
+            {categories.map((category) => (
+              <LocalizedClientLink
+                key={category.id}
+                href={`/categories/${category.handle}`}
+                className="group relative whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#8a6f55] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:text-[#b08a68]"
+              >
+                {category.name}
 
-          <span className="absolute -bottom-2 left-1/2 h-px w-0 -translate-x-1/2 bg-[#b08a68] transition-all duration-300 ease-out group-hover:w-full" />
-        </LocalizedClientLink>
-      ))}
-    </nav>
-  </div>
-)}
+                <span className="absolute -bottom-2 left-1/2 h-px w-0 -translate-x-1/2 bg-[#b08a68] transition-all duration-300 ease-out group-hover:w-full" />
+              </LocalizedClientLink>
+            ))}
+
+            <LocalizedClientLink
+              href="/notre-savoir-faire"
+              className="group relative whitespace-nowrap text-sm font-bold uppercase tracking-[0.18em] text-[#8a6f55] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:text-[#b08a68]"
+            >
+              NOTRE SAVOIR-FAIRE
+
+              <span className="absolute -bottom-2 left-1/2 h-px w-0 -translate-x-1/2 bg-[#b08a68] transition-all duration-300 ease-out group-hover:w-full" />
+            </LocalizedClientLink>
+          </nav>
+        </div>
+      )}
 
       <div className="flex flex-col small:flex-row small:items-start">
         <RefinementList sortBy={sort} />
