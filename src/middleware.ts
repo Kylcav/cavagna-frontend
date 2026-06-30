@@ -40,6 +40,8 @@ async function getRegionMap(cacheId: string) {
       return json
     })
 
+    regionMapCache.regionMap.clear()
+
     regions.forEach((region: HttpTypes.StoreRegion) => {
       region.countries?.forEach((country) => {
         if (country.iso_2) {
@@ -54,6 +56,49 @@ async function getRegionMap(cacheId: string) {
   return regionMapCache.regionMap
 }
 
+async function getIpCountryCode(request: NextRequest) {
+  const vercelCountryCode = request.headers
+    .get("x-vercel-ip-country")
+    ?.toLowerCase()
+
+  if (vercelCountryCode) {
+    return vercelCountryCode
+  }
+
+  const cloudflareCountryCode = request.headers
+    .get("cf-ipcountry")
+    ?.toLowerCase()
+
+  if (cloudflareCountryCode && cloudflareCountryCode !== "xx") {
+    return cloudflareCountryCode
+  }
+
+  const forwardedFor = request.headers.get("x-forwarded-for")
+  const ip = forwardedFor?.split(",")[0]?.trim()
+
+  if (!ip || ip === "127.0.0.1" || ip === "::1") {
+    return null
+  }
+
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/json/`, {
+      next: {
+        revalidate: 60 * 60 * 24,
+      },
+    })
+
+    if (!res.ok) {
+      return null
+    }
+
+    const data = await res.json()
+
+    return data.country_code?.toLowerCase() ?? null
+  } catch {
+    return null
+  }
+}
+
 async function getCountryCode(
   request: NextRequest,
   regionMap: Map<string, HttpTypes.StoreRegion>
@@ -64,12 +109,10 @@ async function getCountryCode(
     return urlCountryCode
   }
 
-  const vercelCountryCode = request.headers
-    .get("x-vercel-ip-country")
-    ?.toLowerCase()
+  const ipCountryCode = await getIpCountryCode(request)
 
-  if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
-    return vercelCountryCode
+  if (ipCountryCode && regionMap.has(ipCountryCode)) {
+    return ipCountryCode
   }
 
   if (regionMap.has(DEFAULT_REGION)) {

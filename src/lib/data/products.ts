@@ -39,11 +39,24 @@ export const listProducts = async ({
   }
 
   if (!region) {
+    console.log("========== PRODUCT DEBUG NO REGION ==========")
+    console.log({ countryCode, regionId, queryParams })
+
     return {
       response: { products: [], count: 0 },
       nextPage: null,
     }
   }
+
+  console.log("========== PRODUCT DEBUG REGION ==========")
+  console.log({
+    countryCode,
+    regionIdInput: regionId,
+    resolvedRegionId: region.id,
+    resolvedRegionName: region.name,
+    currency: region.currency_code,
+    queryParams,
+  })
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -61,9 +74,9 @@ export const listProducts = async ({
         query: {
           limit,
           offset,
-          region_id: region?.id,
+          region_id: region.id,
           fields:
-          "*variants.calculated_price,+variants.inventory_quantity,*variants.images,*variants.options,*options.values,+metadata,+tags,",
+            "*variants.calculated_price,+variants.inventory_quantity,*variants.images,*variants.options,*options.values,+metadata,+tags,",
           ...queryParams,
         },
         headers,
@@ -71,11 +84,27 @@ export const listProducts = async ({
           ...next,
           revalidate: 60,
         },
-        cache: "force-cache",
+        cache: "no-store",
       }
     )
     .then(({ products, count }) => {
- 
+      console.log("========== PRODUCT DEBUG RESPONSE ==========")
+      console.log({
+        countryCode,
+        count,
+        productCount: products.length,
+        products: products.map((p) => ({
+          title: p.title,
+          handle: p.handle,
+          variants: p.variants?.map((v: any) => ({
+            title: v.title,
+            sku: v.sku,
+            calculated_price: v.calculated_price,
+            inventory_quantity: v.inventory_quantity,
+          })),
+        })),
+      })
+
       const nextPage = count > offset + limit ? pageParam + 1 : null
 
       return {
@@ -83,7 +112,7 @@ export const listProducts = async ({
           products,
           count,
         },
-        nextPage: nextPage,
+        nextPage,
         queryParams,
       }
     })
