@@ -55,7 +55,9 @@ export default function HomeCategories({ categories }: Props) {
             preload="auto"
             className="absolute inset-0 h-full w-full object-cover"
           >
+            <source src="/accueil-tel.mp4" type="video/mp4" media="(max-width: 767px)" />
             <source src="/accueil-tel.mov" type="video/quicktime" media="(max-width: 767px)" />
+            <source src="/accueil-site.mp4" type="video/mp4" media="(min-width: 768px)" />
             <source src="/accueil-site.mov" type="video/quicktime" media="(min-width: 768px)" />
           </video>
 
