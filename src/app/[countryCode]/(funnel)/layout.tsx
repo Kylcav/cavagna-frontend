@@ -1,9 +1,9 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Nav from "@modules/layout/templates/nav"
 
 /**
  * Layout dédié aux pages "tunnel de vente" (ex: /aspirateur).
- * Volontairement minimal : barre de navigation + pied de page légal sobre.
+ * Volontairement minimal : un simple bandeau logo (SANS navigation ni panier,
+ * pour ne pas distraire le visiteur) + un pied de page légal sobre.
  * PAS de footer maillots ni de section "savoir-faire" (réservés au site principal).
  */
 export default function FunnelLayout({
@@ -13,7 +13,13 @@ export default function FunnelLayout({
 }) {
   return (
     <>
-      <Nav />
+      <header className="bg-[#09090B]">
+        <div className="content-container flex h-14 items-center justify-center">
+          <span className="text-base font-bold tracking-[0.12em] text-white">
+            CAVAGNA
+          </span>
+        </div>
+      </header>
 
       {children}
 
