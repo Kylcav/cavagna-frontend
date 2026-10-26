@@ -5,7 +5,7 @@ import { Suspense } from "react"
 import MetaPageView from "@modules/common/components/meta-page-view"
 import "../styles/globals.css"
 
-const META_PIXEL_ID = "27024824927171752"
+const META_PIXEL_ID = "1124415230581121"
 const TIKTOK_PIXEL_ID = "D8PFD5RC77U1TIMDIU10"
 
 export const metadata: Metadata = {
