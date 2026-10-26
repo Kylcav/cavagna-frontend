@@ -1,5 +1,6 @@
 import { listProductsWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { HIDDEN_PRODUCT_HANDLES } from "@lib/hidden-products"
 import ProductPreview from "@modules/products/components/product-preview"
 import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -64,7 +65,19 @@ export default async function PaginatedProducts({
     countryCode,
   })
 
-  const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+  // Masque les produits "tunnel" (aspirateur, soie) de la boutique.
+  products = products.filter(
+    (p) => !HIDDEN_PRODUCT_HANDLES.includes(p.handle as string)
+  )
+
+  // Les produits tunnel n'ont pas de catégorie/collection : ils n'apparaissent
+  // que dans la vue "Tous nos produits". On corrige le total de pages là.
+  const isAllView = !collectionId && !categoryId && !productsIds
+  const adjustedCount = isAllView
+    ? Math.max(0, count - HIDDEN_PRODUCT_HANDLES.length)
+    : count
+
+  const totalPages = Math.ceil(adjustedCount / PRODUCT_LIMIT)
 
   return (
     <>
