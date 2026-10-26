@@ -192,7 +192,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
               <span className="text-3xl font-semibold">{priceLabel}</span>
               <span className="text-sm text-white/50">
-                Livraison gratuite
+                Livraison gratuite · 5 à 10 jours
               </span>
             </div>
 
@@ -235,7 +235,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       {/* ========================= BANDEAU CONFIANCE ========================= */}
       <section className="border-y border-white/10 bg-white/[0.02]">
         <div className="content-container grid grid-cols-2 gap-6 py-6 text-center sm:grid-cols-4">
-          <TrustBadge icon={ICONS.truck} title="Livraison gratuite" sub="Sans minimum d'achat" />
+          <TrustBadge icon={ICONS.truck} title="Livraison gratuite" sub="Reçu en 5 à 10 jours" />
           <TrustBadge icon={ICONS.lock} title="Paiement sécurisé" sub="Carte & Stripe" />
           <TrustBadge icon={ICONS.shield} title="Certifié CE" sub="Normes européennes" />
           <TrustBadge icon={ICONS.phone} title="Support en français" sub="Une question ? On répond" />
@@ -413,7 +413,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
                   <ul className="mt-6 space-y-3">
                     <Included text="Robot + station d'auto-vidage" />
                     <Included text="Accessoires et brosses inclus" />
-                    <Included text="Livraison gratuite" />
+                    <Included text="Livraison gratuite (5 à 10 jours)" />
                     <Included text="Paiement 100% sécurisé" />
                   </ul>
 
@@ -478,7 +478,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           />
           <Faq
             q="Comment se passe la livraison ?"
-            a="La livraison est gratuite. Vous recevez un suivi dès l'expédition de votre commande."
+            a="La livraison est gratuite et vous recevez votre commande sous 5 à 10 jours. Un suivi vous est envoyé dès l'expédition."
           />
           <Faq
             q="Puis-je le piloter depuis mon téléphone ?"

@@ -87,7 +87,13 @@ export const StripeCardContainer = ({
       layout: {
         type: "tabs",
       },
-      paymentMethodOrder: ["card", "twint", "paypal"],
+      // Apple Pay / Google Pay (wallets) affichés en priorité quand disponibles.
+      // Nécessite l'activation d'Apple Pay + l'enregistrement du domaine dans Stripe.
+      wallets: {
+        applePay: "auto",
+        googlePay: "auto",
+      },
+      paymentMethodOrder: ["apple_pay", "google_pay", "card", "twint", "paypal"],
     }
   }, [])
 
