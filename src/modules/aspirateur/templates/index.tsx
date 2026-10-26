@@ -70,11 +70,17 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
   const amount = selectedVariant?.calculated_price?.calculated_amount ?? 199
   const currency = selectedVariant?.calculated_price?.currency_code ?? "chf"
 
-  const priceLabel = convertToLocale({
-    amount,
+  const locale = currency.toLowerCase() === "eur" ? "fr-FR" : "fr-CH"
+  const priceLabel = convertToLocale({ amount, currency_code: currency, locale })
+
+  // Prix de référence barré (prix conseillé)
+  const COMPARE_AMOUNT = 399
+  const compareLabel = convertToLocale({
+    amount: COMPARE_AMOUNT,
     currency_code: currency,
-    locale: currency.toLowerCase() === "eur" ? "fr-FR" : "fr-CH",
+    locale,
   })
+  const discountPct = Math.max(0, Math.round((1 - amount / COMPARE_AMOUNT) * 100))
 
   const handleBuy = async () => {
     if (!selectedVariant?.id || isAdding) return
@@ -148,11 +154,17 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
               impeccable — sans lever le petit doigt.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2">
               <span className="text-3xl font-semibold">{priceLabel}</span>
-              <span className="text-sm text-white/50">
-                Livraison gratuite · 5 à 10 jours
+              <span className="text-xl text-white/40 line-through">
+                {compareLabel}
               </span>
+              <span className="rounded-full bg-[#22D3EE]/15 px-2.5 py-1 text-xs font-bold text-[#22D3EE]">
+                -{discountPct}%
+              </span>
+            </div>
+            <div className="mt-2 text-sm text-white/50">
+              Livraison gratuite · 5 à 10 jours
             </div>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -372,7 +384,15 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
                   <div className="text-sm uppercase tracking-[0.16em] text-white/50">
                     Prix
                   </div>
-                  <div className="mt-1 text-5xl font-semibold">{priceLabel}</div>
+                  <div className="mt-1 flex items-baseline justify-center gap-3 sm:justify-end">
+                    <span className="text-5xl font-semibold">{priceLabel}</span>
+                    <span className="text-xl text-white/40 line-through">
+                      {compareLabel}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-[#22D3EE]">
+                    Économisez {discountPct}%
+                  </div>
                   <div className="mt-6">
                     <CTAButton onClick={handleBuy} loading={isAdding}>
                       Commander maintenant
@@ -436,7 +456,14 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-xs text-white/50">Robot aspirateur & laveur</div>
-            <div className="text-lg font-semibold leading-tight">{priceLabel}</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-semibold leading-tight">
+                {priceLabel}
+              </span>
+              <span className="text-sm text-white/40 line-through">
+                {compareLabel}
+              </span>
+            </div>
           </div>
           <button
             onClick={handleBuy}
