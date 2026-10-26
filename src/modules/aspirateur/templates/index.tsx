@@ -14,12 +14,8 @@ type Props = {
   countryCode: string
 }
 
-type Color = "Noir" | "Blanc"
-
-const COLOR_IMAGES: Record<Color, string> = {
-  Noir: "/aspirateur/robot-noir.webp",
-  Blanc: "/aspirateur/robot-blanc.webp",
-}
+const IMG = "/aspirateur/robot.webp"
+const IMG_DETAIL = "/aspirateur/robot-detail.webp"
 
 /* ----------------------------- petites icônes ----------------------------- */
 
@@ -50,11 +46,11 @@ const ICONS = {
     "M12 12m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0|M12 3v3|M12 18v3|M3 12h3|M18 12h3|M5.6 5.6l2.1 2.1|M16.3 16.3l2.1 2.1|M18.4 5.6l-2.1 2.1|M7.7 16.3l-2.1 2.1",
   app: "M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z|M11 18h2",
   battery: "M4 8h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z|M21 11v2|M7 11v2|M10 11v2|M13 11v2",
+  drop: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",
   shield: "M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z|M9 12l2 2 4-4",
   truck: "M3 7h11v8H3z|M14 10h4l3 3v2h-7z|M7.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z|M17.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z",
   lock: "M6 10h12v10H6z|M9 10V7a3 3 0 0 1 6 0v3|M12 14v2",
   check: "M5 12l5 5L20 7",
-  star: "M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.1l1-5.8L3.5 9.2l5.9-.9L12 3z",
   map: "M9 4L3 7v13l6-3 6 3 6-3V4l-6 3-6-3z|M9 4v13|M15 7v13",
   phone: "M7 3h10v18H7z|M11 6h2",
   plus: "M12 5v14|M5 12h14",
@@ -64,20 +60,15 @@ const ICONS = {
 
 export default function AspirateurFunnel({ product, countryCode }: Props) {
   const router = useRouter()
-  const [color, setColor] = useState<Color>("Noir")
   const [isAdding, setIsAdding] = useState(false)
 
   const selectedVariant = useMemo(
-    () =>
-      product.variants?.find((v) =>
-        v.options?.some((o) => o.value === color)
-      ) ?? product.variants?.[0],
-    [product.variants, color]
+    () => product.variants?.[0],
+    [product.variants]
   )
 
   const amount = selectedVariant?.calculated_price?.calculated_amount ?? 199
-  const currency =
-    selectedVariant?.calculated_price?.currency_code ?? "chf"
+  const currency = selectedVariant?.calculated_price?.currency_code ?? "chf"
 
   const priceLabel = convertToLocale({
     amount,
@@ -133,7 +124,6 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
     <div className="bg-[#09090B] text-white">
       {/* ============================= HERO ============================= */}
       <section className="relative overflow-hidden">
-        {/* halo */}
         <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#7C6CFF]/25 blur-[140px]" />
         <div className="pointer-events-none absolute right-0 top-40 h-[380px] w-[380px] rounded-full bg-[#22D3EE]/15 blur-[130px]" />
 
@@ -141,7 +131,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           <div className="order-2 lg:order-1">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
               <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE]" />
-              Robot aspirateur nouvelle génération
+              Robot aspirateur & laveur
             </span>
 
             <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-[56px]">
@@ -153,42 +143,11 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             </h1>
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg">
-              18 000 Pa d'aspiration, navigation laser et une station qui se
-              vide toute seule. Votre maison reste impeccable — sans lever le
-              petit doigt.
+              35 000 Pa d'aspiration, lavage intelligent des sols, navigation
+              laser et une station qui se vide toute seule. Votre maison reste
+              impeccable — sans lever le petit doigt.
             </p>
 
-            {/* color selector */}
-            <div className="mt-8">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-                Coloris — {color}
-              </div>
-              <div className="mt-3 flex gap-3">
-                {(["Noir", "Blanc"] as Color[]).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    aria-pressed={color === c}
-                    className={`flex items-center gap-2.5 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                      color === c
-                        ? "border-white bg-white text-[#09090B]"
-                        : "border-white/20 bg-white/5 text-white/80 hover:border-white/40"
-                    }`}
-                  >
-                    <span
-                      className={`h-4 w-4 rounded-full border ${
-                        c === "Noir"
-                          ? "border-white/30 bg-[#17171b]"
-                          : "border-black/10 bg-white"
-                      }`}
-                    />
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* price + CTA */}
             <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
               <span className="text-3xl font-semibold">{priceLabel}</span>
               <span className="text-sm text-white/50">
@@ -208,7 +167,6 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
               </a>
             </div>
 
-            {/* mini trust */}
             <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/55">
               <TrustInline icon={ICONS.truck} label="Livraison gratuite" />
               <TrustInline icon={ICONS.lock} label="Paiement sécurisé" />
@@ -216,16 +174,15 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             </div>
           </div>
 
-          {/* product image */}
           <div className="order-1 flex justify-center lg:order-2">
             <div className="relative">
               <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[#7C6CFF]/20 to-transparent blur-2xl" />
               <img
-                src={COLOR_IMAGES[color]}
-                alt={`Robot aspirateur ${color.toLowerCase()} avec station d'auto-vidage`}
-                className="h-auto w-[300px] drop-shadow-2xl sm:w-[380px] lg:w-[460px]"
-                width={460}
-                height={460}
+                src={IMG}
+                alt="Robot aspirateur et laveur avec station d'auto-vidage"
+                className="h-auto w-[300px] rounded-2xl shadow-2xl sm:w-[380px] lg:w-[480px]"
+                width={480}
+                height={480}
               />
             </div>
           </div>
@@ -236,7 +193,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       <section className="border-y border-white/10 bg-white/[0.02]">
         <div className="content-container grid grid-cols-2 gap-6 py-6 text-center sm:grid-cols-4">
           <TrustBadge icon={ICONS.truck} title="Livraison gratuite" sub="Reçu en 5 à 10 jours" />
-          <TrustBadge icon={ICONS.lock} title="Paiement sécurisé" sub="Carte & Stripe" />
+          <TrustBadge icon={ICONS.lock} title="Paiement sécurisé" sub="Carte, Apple & Google Pay" />
           <TrustBadge icon={ICONS.shield} title="Certifié CE" sub="Normes européennes" />
           <TrustBadge icon={ICONS.phone} title="Support en français" sub="Une question ? On répond" />
         </div>
@@ -246,14 +203,19 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       <section className="content-container py-16 sm:py-24">
         <SectionHead
           eyebrow="Pourquoi on l'adore"
-          title="Un ménage qui se fait tout seul"
+          title="Il aspire, il lave, il se vide tout seul"
           sub="Pensé pour les gens occupés : vous programmez, il s'occupe du reste."
         />
         <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <FeatureCard
             icon={ICONS.suction}
-            title="18 000 Pa d'aspiration"
-            text="Assez de puissance pour déloger poussière, miettes et poils d'animaux, sur sols durs comme sur tapis."
+            title="35 000 Pa d'aspiration"
+            text="Une puissance d'aspiration exceptionnelle qui déloge poussière, miettes et poils d'animaux, sur sols durs comme sur tapis."
+          />
+          <FeatureCard
+            icon={ICONS.drop}
+            title="Aspire ET lave"
+            text="2-en-1 : il aspire et lave vos sols dans la foulée, en humide comme en sec, pour des surfaces vraiment propres."
           />
           <FeatureCard
             icon={ICONS.empty}
@@ -262,13 +224,8 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           />
           <FeatureCard
             icon={ICONS.laser}
-            title="Navigation laser LDS"
-            text="Il cartographie votre intérieur au laser, planifie son trajet et évite les obstacles — aucune zone oubliée."
-          />
-          <FeatureCard
-            icon={ICONS.app}
-            title="Pilotage par application"
-            text="Lancez, programmez et suivez le nettoyage depuis votre téléphone, où que vous soyez."
+            title="Navigation laser LDS + VSLAM"
+            text="Double navigation laser + caméra : il cartographie votre intérieur, planifie son trajet et évite les obstacles."
           />
         </div>
       </section>
@@ -281,10 +238,10 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
               align="left"
               eyebrow="Le problème"
               title="Le ménage, cette corvée sans fin"
-              sub="Passer l'aspirateur plusieurs fois par semaine, se baisser, vider le bac, recommencer. Du temps que vous préféreriez passer autrement."
+              sub="Passer l'aspirateur, puis la serpillière, se baisser, vider le bac, recommencer. Du temps que vous préféreriez passer autrement."
             />
             <ul className="mt-8 space-y-4">
-              <SolutionLine text="Il nettoie seul, tous les jours si vous voulez — même quand vous n'êtes pas là." />
+              <SolutionLine text="Il aspire et lave seul, tous les jours si vous voulez — même quand vous n'êtes pas là." />
               <SolutionLine text="Il se vide tout seul : des semaines sans y penser." />
               <SolutionLine text="Il se faufile sous les meubles là où le balai ne passe pas." />
               <SolutionLine text="Vous rentrez, c'est propre. C'est tout." />
@@ -292,11 +249,11 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           </div>
           <div className="relative flex justify-center">
             <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-[#7C6CFF]/15 to-[#22D3EE]/10 blur-2xl" />
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-4">
               <img
-                src={COLOR_IMAGES[color]}
-                alt={`Robot aspirateur ${color.toLowerCase()}`}
-                className="h-auto w-[280px] sm:w-[360px]"
+                src={IMG_DETAIL}
+                alt="Robot aspirateur et laveur"
+                className="h-auto w-[280px] rounded-xl sm:w-[360px]"
                 width={360}
                 height={360}
               />
@@ -314,22 +271,22 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
         <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="flex justify-center">
             <img
-              src={COLOR_IMAGES[color]}
-              alt={`Robot aspirateur ${color.toLowerCase()} avec station`}
-              className="h-auto w-[320px] sm:w-[420px]"
-              width={420}
-              height={420}
+              src={IMG}
+              alt="Robot aspirateur et laveur avec station"
+              className="h-auto w-[320px] rounded-2xl sm:w-[440px]"
+              width={440}
+              height={440}
             />
           </div>
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-            <Spec icon={ICONS.suction} label="Aspiration" value="18 000 Pa" />
+            <Spec icon={ICONS.suction} label="Aspiration" value="35 000 Pa" />
+            <Spec icon={ICONS.drop} label="Fonction" value="Aspire + lave (2-en-1)" />
             <Spec icon={ICONS.empty} label="Station" value="Vidage automatique" />
-            <Spec icon={ICONS.laser} label="Navigation" value="Laser LDS SLAM" />
-            <Spec icon={ICONS.map} label="Bac à poussière" value="2,5 litres" />
-            <Spec icon={ICONS.battery} label="Autonomie" value="Jusqu'à 120 min" />
+            <Spec icon={ICONS.laser} label="Navigation" value="Laser LDS + VSLAM" />
+            <Spec icon={ICONS.battery} label="Autonomie" value="Jusqu'à 180 min" />
+            <Spec icon={ICONS.map} label="Réservoir d'eau" value="4 litres" />
             <Spec icon={ICONS.app} label="Contrôle" value="Application mobile" />
             <Spec icon={ICONS.shield} label="Certification" value="CE" />
-            <Spec icon={ICONS.plus} label="Tension" value="110–240 V" />
           </div>
         </div>
       </section>
@@ -337,10 +294,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       {/* =========================== COMMENT ÇA MARCHE ======================= */}
       <section className="bg-[#0E0E13]">
         <div className="content-container py-16 sm:py-24">
-          <SectionHead
-            eyebrow="Simple comme bonjour"
-            title="En 3 étapes"
-          />
+          <SectionHead eyebrow="Simple comme bonjour" title="En 3 étapes" />
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             <StepCard
               n="1"
@@ -349,8 +303,8 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             />
             <StepCard
               n="2"
-              title="Il cartographie & nettoie"
-              text="Le laser scanne votre intérieur, il planifie son trajet et aspire chaque recoin."
+              title="Il cartographie, aspire & lave"
+              text="Le laser scanne votre intérieur, il planifie son trajet, aspire puis lave chaque recoin."
             />
             <StepCard
               n="3"
@@ -362,12 +316,8 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       </section>
 
       {/* ============================== AVIS ================================ */}
-      {/* Avis réels d'acheteurs du produit (fournis par le client). */}
       <section className="content-container py-16 sm:py-24">
-        <SectionHead
-          eyebrow="Ils l'ont adopté"
-          title="Ce qu'en disent les acheteurs"
-        />
+        <SectionHead eyebrow="Ils l'ont adopté" title="Ce qu'en disent les acheteurs" />
         <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-3">
           <Review
             initial="A"
@@ -390,7 +340,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             author="M***i"
             country="États-Unis"
             date="30 sept. 2026"
-            text="Performance de nettoyage correcte, aspiration un peu en deçà de mes attentes. Le nettoyage à la serpillière est bon. Batterie : bonne. Capacité : bonne. Niveau sonore : excellent. Navigation correcte — un petit souci de retour à la base."
+            text="Performance de nettoyage correcte. Le nettoyage à la serpillière est bon. Batterie : bonne. Capacité : bonne. Niveau sonore : excellent. Navigation correcte."
           />
         </div>
       </section>
@@ -404,43 +354,18 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
               <div className="relative grid grid-cols-1 items-center gap-10 sm:grid-cols-[1fr_auto]">
                 <div>
                   <h3 className="text-2xl font-semibold sm:text-3xl">
-                    Robot Aspirateur 18 000 Pa
+                    Robot Aspirateur & Laveur 35 000 Pa
                   </h3>
                   <p className="mt-2 text-white/60">
-                    Station d'auto-vidage · Navigation laser · Pilotage par app
+                    Station d'auto-vidage · Aspire & lave · Navigation laser · App
                   </p>
 
                   <ul className="mt-6 space-y-3">
                     <Included text="Robot + station d'auto-vidage" />
-                    <Included text="Accessoires et brosses inclus" />
+                    <Included text="Accessoires et serpillières inclus" />
                     <Included text="Livraison gratuite (5 à 10 jours)" />
                     <Included text="Paiement 100% sécurisé" />
                   </ul>
-
-                  {/* color selector (rappel) */}
-                  <div className="mt-7 flex gap-3">
-                    {(["Noir", "Blanc"] as Color[]).map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setColor(c)}
-                        aria-pressed={color === c}
-                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                          color === c
-                            ? "border-white bg-white text-[#09090B]"
-                            : "border-white/20 bg-white/5 text-white/80 hover:border-white/40"
-                        }`}
-                      >
-                        <span
-                          className={`h-3.5 w-3.5 rounded-full border ${
-                            c === "Noir"
-                              ? "border-white/30 bg-[#17171b]"
-                              : "border-black/10 bg-white"
-                          }`}
-                        />
-                        {c}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 <div className="text-center sm:text-right">
@@ -465,12 +390,12 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
         <SectionHead eyebrow="Vous vous demandez…" title="Questions fréquentes" />
         <div className="mx-auto mt-10 max-w-3xl divide-y divide-white/10 border-y border-white/10">
           <Faq
-            q="Fonctionne-t-il sur les tapis et le parquet ?"
-            a="Oui. Avec ses 18 000 Pa, il passe des sols durs (parquet, carrelage) aux tapis courts sans problème, en adaptant son aspiration."
+            q="Est-ce qu'il aspire et lave en même temps ?"
+            a="Oui, c'est un robot 2-en-1 : il aspire puis lave vos sols dans la foulée, en mode humide comme en sec, sur sols durs et tapis courts."
           />
           <Faq
             q="À quelle fréquence faut-il vider la station ?"
-            a="Grâce au vidage automatique, le robot se vide seul dans la station après chaque cycle. Il vous suffit de changer le sac/bac de la station toutes les quelques semaines."
+            a="Grâce au vidage automatique, le robot se vide seul dans la station après chaque cycle. Il vous suffit de vider le bac de la station toutes les quelques semaines."
           />
           <Faq
             q="Est-ce bruyant ?"
@@ -500,7 +425,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           </p>
           <div className="mt-8 flex justify-center">
             <CTAButton onClick={handleBuy} loading={isAdding}>
-              Commander mon robot ({color})
+              Commander mon robot
             </CTAButton>
           </div>
         </div>
@@ -510,7 +435,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       <div className="sticky bottom-0 z-40 border-t border-white/10 bg-[#09090B]/95 px-4 py-3 backdrop-blur sm:hidden">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-xs text-white/50">Robot aspirateur · {color}</div>
+            <div className="text-xs text-white/50">Robot aspirateur & laveur</div>
             <div className="text-lg font-semibold leading-tight">{priceLabel}</div>
           </div>
           <button
