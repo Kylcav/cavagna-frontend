@@ -12,6 +12,7 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { soieColorImage } from "@lib/util/soie-thumbnail"
 import { useState } from "react"
 
 type ItemProps = {
@@ -23,6 +24,13 @@ type ItemProps = {
 const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Vignette : coloris soie choisi en priorité, sinon image produit/variante.
+  const soieImg = soieColorImage(item)
+  const thumb = soieImg || item.variant?.images?.[0]?.url || item.thumbnail
+  const thumbImages = soieImg
+    ? undefined
+    : item.variant?.images || item.variant?.product?.images
 
   const changeQuantity = async (quantity: number) => {
     setError(null)
@@ -54,8 +62,8 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
               className="mx-auto flex w-28"
             >
               <Thumbnail
-                thumbnail={item.variant?.images?.[0]?.url || item.thumbnail}
-                images={item.variant?.images || item.variant?.product?.images}
+                thumbnail={thumb}
+                images={thumbImages}
                 size="square"
               />
             </LocalizedClientLink>
@@ -144,8 +152,8 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             })}
           >
             <Thumbnail
-              thumbnail={item.variant?.images?.[0]?.url || item.thumbnail}
-              images={item.variant?.images || item.variant?.product?.images}
+              thumbnail={thumb}
+              images={thumbImages}
               size="square"
             />
           </LocalizedClientLink>
