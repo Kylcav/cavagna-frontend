@@ -82,7 +82,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
   const priceLabel = convertToLocale({
     amount,
     currency_code: currency,
-    locale: "fr-CH",
+    locale: currency.toLowerCase() === "eur" ? "fr-FR" : "fr-CH",
   })
 
   const handleBuy = async () => {
@@ -192,7 +192,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
             <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
               <span className="text-3xl font-semibold">{priceLabel}</span>
               <span className="text-sm text-white/50">
-                Livraison gratuite en Suisse
+                Livraison gratuite
               </span>
             </div>
 
@@ -210,9 +210,9 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
 
             {/* mini trust */}
             <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/55">
+              <TrustInline icon={ICONS.truck} label="Livraison gratuite" />
               <TrustInline icon={ICONS.lock} label="Paiement sécurisé" />
               <TrustInline icon={ICONS.shield} label="Certifié CE" />
-              <TrustInline icon={ICONS.truck} label="Expédié de Suisse" />
             </div>
           </div>
 
@@ -235,7 +235,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
       {/* ========================= BANDEAU CONFIANCE ========================= */}
       <section className="border-y border-white/10 bg-white/[0.02]">
         <div className="content-container grid grid-cols-2 gap-6 py-6 text-center sm:grid-cols-4">
-          <TrustBadge icon={ICONS.truck} title="Livraison gratuite" sub="Partout en Suisse" />
+          <TrustBadge icon={ICONS.truck} title="Livraison gratuite" sub="Suisse & Europe" />
           <TrustBadge icon={ICONS.lock} title="Paiement sécurisé" sub="Carte & Stripe" />
           <TrustBadge icon={ICONS.shield} title="Certifié CE" sub="Normes européennes" />
           <TrustBadge icon={ICONS.phone} title="Support en français" sub="Une question ? On répond" />
@@ -413,7 +413,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
                   <ul className="mt-6 space-y-3">
                     <Included text="Robot + station d'auto-vidage" />
                     <Included text="Accessoires et brosses inclus" />
-                    <Included text="Livraison gratuite en Suisse" />
+                    <Included text="Livraison gratuite (Suisse & Europe)" />
                     <Included text="Paiement 100% sécurisé" />
                   </ul>
 
@@ -478,7 +478,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           />
           <Faq
             q="Comment se passe la livraison ?"
-            a="La livraison est gratuite partout en Suisse. Vous recevez un suivi dès l'expédition de votre commande."
+            a="La livraison est gratuite, en Suisse comme en Europe. Vous recevez un suivi dès l'expédition de votre commande."
           />
           <Faq
             q="Puis-je le piloter depuis mon téléphone ?"
@@ -496,7 +496,7 @@ export default function AspirateurFunnel({ product, countryCode }: Props) {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/60">
             Votre maison impeccable chaque jour, pour {priceLabel}. Livraison
-            gratuite en Suisse.
+            gratuite.
           </p>
           <div className="mt-8 flex justify-center">
             <CTAButton onClick={handleBuy} loading={isAdding}>

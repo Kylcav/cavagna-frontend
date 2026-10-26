@@ -13,7 +13,7 @@ type Props = {
 export const metadata: Metadata = {
   title: "Robot Aspirateur 18 000 Pa – Station auto-vidage | CAVAGNA",
   description:
-    "Le robot aspirateur qui nettoie, cartographie au laser et se vide tout seul. 18 000 Pa, pilotage par application, disponible en noir et blanc. Livraison gratuite en Suisse.",
+    "Le robot aspirateur qui nettoie, cartographie au laser et se vide tout seul. 18 000 Pa, pilotage par application, disponible en noir et blanc. Livraison gratuite.",
   openGraph: {
     title: "Robot Aspirateur 18 000 Pa – Station auto-vidage",
     description:
