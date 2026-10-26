@@ -38,6 +38,22 @@ const COLOR_HEX: Record<string, string> = {
   "Rouge rubis": "#8E1F30",
 }
 
+// Photo du coussin dans chaque coloris (change l'image du hero au clic).
+const COLOR_IMG: Record<string, string> = {
+  "Blanc nacré": "/soie/colors/soie-BLNC.jpg",
+  Champagne: "/soie/colors/soie-CHMP.jpg",
+  "Or rose": "/soie/colors/soie-ORRS.jpg",
+  "Rose poudré": "/soie/colors/soie-RSPD.jpg",
+  Rose: "/soie/colors/soie-ROSE.jpg",
+  "Gris perle": "/soie/colors/soie-GRPL.jpg",
+  "Gris anthracite": "/soie/colors/soie-GRAN.jpg",
+  "Bleu nuit": "/soie/colors/soie-BLNT.jpg",
+  "Bleu paon": "/soie/colors/soie-BLPA.jpg",
+  Émeraude: "/soie/colors/soie-EMER.jpg",
+  Terracotta: "/soie/colors/soie-TERR.jpg",
+  "Rouge rubis": "/soie/colors/soie-RUBI.jpg",
+}
+
 // Prix de référence barré selon le format (valeur mise en avant).
 const COMPARE_BY_FORMAT: Record<string, number> = {
   [FORMAT_UNITE]: 89,
@@ -105,7 +121,11 @@ export default function SoieFunnel({ product, countryCode }: Props) {
   )
 
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "Champagne")
+  const [selectedColor2, setSelectedColor2] = useState(colors[0] ?? "Champagne")
   const [selectedFormat, setSelectedFormat] = useState(FORMAT_DUO)
+
+  const isDuo = selectedFormat === FORMAT_DUO
+  const heroImg = COLOR_IMG[selectedColor] ?? IMG_HERO
 
   const selectedVariant = useMemo(() => {
     return product.variants?.find((v) => {
@@ -153,6 +173,12 @@ export default function SoieFunnel({ product, countryCode }: Props) {
         variantId: selectedVariant.id,
         quantity: 1,
         countryCode,
+        metadata: isDuo
+          ? {
+              couleur_1: selectedColor,
+              couleur_2: selectedColor2,
+            }
+          : { couleur_1: selectedColor },
       })
 
       const value = amount
@@ -215,32 +241,21 @@ export default function SoieFunnel({ product, countryCode }: Props) {
             </p>
 
             {/* Coloris */}
-            <div className="mt-8">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium">Coloris :</span>
-                <span className="text-[#6B625B]">{selectedColor}</span>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2.5">
-                {colors.map((c) => {
-                  const active = c === selectedColor
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setSelectedColor(c)}
-                      title={c}
-                      aria-label={c}
-                      aria-pressed={active}
-                      className={`h-9 w-9 rounded-full ring-1 ring-black/10 transition-all ${
-                        active
-                          ? "ring-2 ring-offset-2 ring-offset-[#FBF8F3] ring-[#A9823F] scale-105"
-                          : "hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: COLOR_HEX[c] ?? "#D9D4CC" }}
-                    />
-                  )
-                })}
-              </div>
+            <div className="mt-8 space-y-5">
+              <ColorRow
+                label={isDuo ? "1ᵉ coloris" : "Coloris"}
+                colors={colors}
+                selected={selectedColor}
+                onSelect={setSelectedColor}
+              />
+              {isDuo && (
+                <ColorRow
+                  label="2ᵉ coloris"
+                  colors={colors}
+                  selected={selectedColor2}
+                  onSelect={setSelectedColor2}
+                />
+              )}
             </div>
 
             {/* Format */}
@@ -293,9 +308,10 @@ export default function SoieFunnel({ product, countryCode }: Props) {
             <div className="relative">
               <div className="absolute inset-0 -z-10 translate-x-6 translate-y-6 rounded-[2rem] bg-[#E3D1AE]/30 blur-2xl" />
               <img
-                src={IMG_HERO}
-                alt="Taie d'oreiller en soie de mûrier"
-                className="h-auto w-[320px] rounded-[1.75rem] object-cover shadow-[0_30px_60px_-20px_rgba(60,40,20,0.35)] sm:w-[420px] lg:w-[520px]"
+                key={heroImg}
+                src={heroImg}
+                alt={`Taie d'oreiller en soie de mûrier — ${selectedColor}`}
+                className="h-auto w-[320px] rounded-[1.75rem] object-cover shadow-[0_30px_60px_-20px_rgba(60,40,20,0.35)] transition-opacity duration-300 sm:w-[420px] lg:w-[520px]"
                 width={520}
                 height={520}
               />
@@ -427,7 +443,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
       {/* ============================== AVIS =============================== */}
       <section className="content-container py-16 sm:py-24">
         <SectionHead eyebrow="Témoignages" title="Elles ne reviendraient pas au coton" />
-        <p className="mx-auto -mt-6 mb-2 text-center text-xs italic text-[#6B625B]/70">
+        <p className="mx-auto mt-4 max-w-md text-center text-xs italic text-[#6B625B]/70">
           Avis d'exemple — à remplacer par vos avis clients vérifiés avant le
           lancement.
         </p>
@@ -459,7 +475,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
           <div className="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-[#C8A86B]/30 bg-white">
             <div className="grid grid-cols-1 sm:grid-cols-2">
               <img
-                src={IMG_CHAMPAGNE}
+                key={heroImg}
+                src={heroImg}
                 alt="Taie d'oreiller en soie"
                 className="h-56 w-full object-cover sm:h-full"
               />
@@ -468,7 +485,10 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                   Taie en soie de mûrier
                 </h3>
                 <p className="mt-2 text-sm text-[#6B625B]">
-                  {selectedColor} · 48 × 74 cm · {selectedFormat}
+                  {isDuo
+                    ? `${selectedColor} + ${selectedColor2}`
+                    : selectedColor}{" "}
+                  · 48 × 74 cm · {selectedFormat}
                 </p>
                 <ul className="mt-6 space-y-3">
                   <Included text="Soie de mûrier 100%, tissage satin" />
@@ -636,6 +656,48 @@ function FormatCard({
       <div className="mt-2 text-lg font-semibold">{price}</div>
       {note && <div className="text-xs font-medium text-[#A9823F]">{note}</div>}
     </button>
+  )
+}
+
+function ColorRow({
+  label,
+  colors,
+  selected,
+  onSelect,
+}: {
+  label: string
+  colors: string[]
+  selected: string
+  onSelect: (c: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 text-sm">
+        <span className="font-medium">{label} :</span>
+        <span className="text-[#6B625B]">{selected}</span>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2.5">
+        {colors.map((c) => {
+          const active = c === selected
+          return (
+            <button
+              key={c}
+              type="button"
+              onClick={() => onSelect(c)}
+              title={c}
+              aria-label={c}
+              aria-pressed={active}
+              className={`h-9 w-9 rounded-full ring-1 ring-black/10 transition-all ${
+                active
+                  ? "scale-105 ring-2 ring-[#A9823F] ring-offset-2 ring-offset-[#FBF8F3]"
+                  : "hover:scale-105"
+              }`}
+              style={{ backgroundColor: COLOR_HEX[c] ?? "#D9D4CC" }}
+            />
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
