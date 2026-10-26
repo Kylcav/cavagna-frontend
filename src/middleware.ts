@@ -57,6 +57,20 @@ async function getRegionMap(cacheId: string) {
 }
 
 async function getIpCountryCode(request: NextRequest) {
+  // Géolocalisation locale fournie par nginx (module GeoIP2, base db-ip).
+  // Fiable, instantanée, sans dépendance à un service externe rate-limité.
+  const nginxCountryCode = request.headers
+    .get("x-country-code")
+    ?.toLowerCase()
+
+  if (
+    nginxCountryCode &&
+    nginxCountryCode.length === 2 &&
+    nginxCountryCode !== "xx"
+  ) {
+    return nginxCountryCode
+  }
+
   const vercelCountryCode = request.headers
     .get("x-vercel-ip-country")
     ?.toLowerCase()
