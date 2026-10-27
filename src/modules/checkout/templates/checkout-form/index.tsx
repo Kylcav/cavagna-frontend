@@ -29,13 +29,21 @@ export default async function CheckoutForm({
     <div className="w-full grid grid-cols-1 gap-y-8">
       <MetaInitiateCheckout cart={cart} />
 
-      <Addresses cart={cart} customer={customer} />
+      <div id="checkout-address" style={{ scrollMarginTop: "24px" }}>
+        <Addresses cart={cart} customer={customer} />
+      </div>
 
-      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      <div id="checkout-delivery" style={{ scrollMarginTop: "24px" }}>
+        <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      </div>
 
-      <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      <div id="checkout-payment" style={{ scrollMarginTop: "24px" }}>
+        <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      </div>
 
-      <Review cart={cart} />
+      <div id="checkout-review" style={{ scrollMarginTop: "24px" }}>
+        <Review cart={cart} />
+      </div>
     </div>
   )
 }
