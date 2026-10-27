@@ -30,3 +30,18 @@ export const soieColorImage = (
   const code = typeof c === "string" ? SOIE_COLOR_CODE[c] : undefined
   return code ? `/soie/colors/soie-${code}.jpg` : undefined
 }
+
+/**
+ * Libellé des coloris pour un "Lot de 2" bicolore (ex. "Blanc nacré + Rouge
+ * rubis"). Renvoie undefined pour une seule couleur (déjà affichée par la
+ * variante) ou un article non-soie.
+ */
+export const soieColorsLabel = (
+  item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
+): string | undefined => {
+  const m = item.metadata as Record<string, unknown> | undefined
+  const c1 = typeof m?.couleur_1 === "string" ? m.couleur_1 : undefined
+  const c2 = typeof m?.couleur_2 === "string" ? m.couleur_2 : undefined
+  if (c1 && c2 && c2 !== c1) return `${c1} + ${c2}`
+  return undefined
+}

@@ -12,7 +12,7 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
-import { soieColorImage } from "@lib/util/soie-thumbnail"
+import { soieColorImage, soieColorsLabel } from "@lib/util/soie-thumbnail"
 import { useState } from "react"
 
 type ItemProps = {
@@ -80,6 +80,11 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
                 variant={item.variant}
                 data-testid="product-variant"
               />
+              {soieColorsLabel(item) && (
+                <Text className="txt-small text-ui-fg-subtle">
+                  Coloris : {soieColorsLabel(item)}
+                </Text>
+              )}
             </div>
 
             {type === "full" && (
@@ -170,6 +175,11 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             variant={item.variant}
             data-testid="product-variant"
           />
+          {soieColorsLabel(item) && (
+            <Text className="txt-small text-ui-fg-subtle">
+              Coloris : {soieColorsLabel(item)}
+            </Text>
+          )}
         </Table.Cell>
 
         {type === "full" && (
