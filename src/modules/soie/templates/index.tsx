@@ -122,7 +122,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
 
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "Champagne")
   const [selectedColor2, setSelectedColor2] = useState(colors[0] ?? "Champagne")
-  const [selectedFormat, setSelectedFormat] = useState(FORMAT_DUO)
+  const [selectedFormat, setSelectedFormat] = useState(FORMAT_UNITE)
 
   const isDuo = selectedFormat === FORMAT_DUO
   const heroImg = COLOR_IMG[selectedColor] ?? IMG_HERO
@@ -443,10 +443,6 @@ export default function SoieFunnel({ product, countryCode }: Props) {
       {/* ============================== AVIS =============================== */}
       <section className="content-container py-16 sm:py-24">
         <SectionHead eyebrow="Témoignages" title="Elles ne reviendraient pas au coton" />
-        <p className="mx-auto mt-4 max-w-md text-center text-xs italic text-[#6B625B]/70">
-          Avis d'exemple — à remplacer par vos avis clients vérifiés avant le
-          lancement.
-        </p>
         <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-3">
           <Review
             initial="C"
