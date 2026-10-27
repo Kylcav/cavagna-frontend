@@ -2,6 +2,7 @@ import { Heading } from "@medusajs/ui"
 import { cookies as nextCookies } from "next/headers"
 
 import CartTotals from "@modules/common/components/cart-totals"
+import ScrollToTop from "@modules/common/components/scroll-to-top"
 import Items from "@modules/order/components/items"
 import MetaPurchase from "@modules/order/components/meta-purchase"
 import OnboardingCta from "@modules/order/components/onboarding-cta"
@@ -23,6 +24,7 @@ export default async function OrderCompletedTemplate({
 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
+      <ScrollToTop />
       <MetaPurchase order={order} />
 
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
