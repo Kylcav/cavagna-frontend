@@ -20,7 +20,7 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
   year: "numeric",
 })
 
-const randomOrderNumber = order.id.slice(-8).toUpperCase()
+const orderNumber = `#${order.display_id}`
 
   return (
     <div>
@@ -41,7 +41,7 @@ const randomOrderNumber = order.id.slice(-8).toUpperCase()
         </span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
-        Numéro de commande : <span data-testid="order-id">{randomOrderNumber}</span>
+        Numéro de commande : <span data-testid="order-id">{orderNumber}</span>
       </Text>
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">
