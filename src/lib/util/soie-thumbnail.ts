@@ -32,8 +32,10 @@ export const soieColorImage = (
 }
 
 /**
- * Libellé des coloris pour un "Lot de 2" bicolore (ex. "Blanc nacré + Rouge
- * rubis"). Renvoie undefined pour une seule couleur (déjà affichée par la
+ * Détail rassurant des coloris pour un "Lot de 2" :
+ *  - bicolore  -> "1× Blanc nacré + 1× Rouge rubis"
+ *  - même teinte -> "2× Blanc nacré"
+ * Renvoie undefined pour une seule taie (le coloris est déjà affiché par la
  * variante) ou un article non-soie.
  */
 export const soieColorsLabel = (
@@ -42,6 +44,7 @@ export const soieColorsLabel = (
   const m = item.metadata as Record<string, unknown> | undefined
   const c1 = typeof m?.couleur_1 === "string" ? m.couleur_1 : undefined
   const c2 = typeof m?.couleur_2 === "string" ? m.couleur_2 : undefined
-  if (c1 && c2 && c2 !== c1) return `${c1} + ${c2}`
-  return undefined
+  if (!c1 || !c2) return undefined // 1 taie : coloris déjà affiché par la variante
+  if (c2 !== c1) return `1× ${c1} + 1× ${c2}`
+  return `2× ${c1}`
 }
