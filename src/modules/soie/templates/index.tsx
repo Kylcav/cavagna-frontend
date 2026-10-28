@@ -220,6 +220,7 @@ const ICONS = {
 export default function SoieFunnel({ product, countryCode }: Props) {
   const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
+  const [buyError, setBuyError] = useState<string | null>(null)
 
   const colorOption = useMemo(
     () => product.options?.find((o) => o.title === "Couleur"),
@@ -297,6 +298,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
 
   const handleBuy = async () => {
     if (!selectedVariant?.id || isAdding) return
+    setBuyError(null)
     setIsAdding(true)
     try {
       await addToCart({
@@ -311,34 +313,45 @@ export default function SoieFunnel({ product, countryCode }: Props) {
       const value = amount
       const cur = currency.toUpperCase()
 
-      fbq("AddToCart", {
-        content_ids: [selectedVariant.id],
-        content_name: product.title,
-        content_type: "product",
-        contents: [{ id: selectedVariant.id, quantity: 1, item_price: value }],
-        value,
-        currency: cur,
-      })
-      fbq("InitiateCheckout", {
-        content_ids: [selectedVariant.id],
-        content_name: product.title,
-        value,
-        currency: cur,
-        num_items: 1,
-      })
-      ttqTrack("AddToCart", {
-        content_id: selectedVariant.id,
-        content_name: product.title,
-        content_type: "product",
-        quantity: 1,
-        price: value,
-        value,
-        currency: cur,
-      })
+      try {
+        fbq("AddToCart", {
+          content_ids: [selectedVariant.id],
+          content_name: product.title,
+          content_type: "product",
+          contents: [
+            { id: selectedVariant.id, quantity: 1, item_price: value },
+          ],
+          value,
+          currency: cur,
+        })
+        fbq("InitiateCheckout", {
+          content_ids: [selectedVariant.id],
+          content_name: product.title,
+          value,
+          currency: cur,
+          num_items: 1,
+        })
+        ttqTrack("AddToCart", {
+          content_id: selectedVariant.id,
+          content_name: product.title,
+          content_type: "product",
+          quantity: 1,
+          price: value,
+          value,
+          currency: cur,
+        })
+      } catch {
+        /* le tracking ne doit jamais bloquer l'achat */
+      }
 
+      // On garde l'état "en cours" : la navigation va démonter la page.
+      // L'écran de chargement du checkout (loading.tsx) prend le relais.
       router.push(`/${countryCode}/checkout`)
-    } finally {
+    } catch (e) {
       setIsAdding(false)
+      setBuyError(
+        "Ajout impossible pour le moment. Vérifiez votre connexion et réessayez."
+      )
     }
   }
 
@@ -346,18 +359,32 @@ export default function SoieFunnel({ product, countryCode }: Props) {
     document.getElementById("avis")?.scrollIntoView({ behavior: "smooth" })
 
   const BuyCTA = ({ variant = "ink" }: { variant?: "ink" | "white" }) => (
-    <button
-      onClick={handleBuy}
-      disabled={isAdding}
-      className="w-full rounded-full py-4 text-base font-bold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-      style={
-        variant === "white"
-          ? { backgroundColor: "#fff", color: C.ink }
-          : { backgroundColor: C.ink, color: "#fff" }
-      }
-    >
-      {isAdding ? "Un instant…" : "Ajouter au panier"}
-    </button>
+    <div className="w-full">
+      <button
+        onClick={handleBuy}
+        disabled={isAdding}
+        aria-busy={isAdding}
+        className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-base font-bold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+        style={
+          variant === "white"
+            ? { backgroundColor: "#fff", color: C.ink }
+            : { backgroundColor: C.ink, color: "#fff" }
+        }
+      >
+        {isAdding && (
+          <span
+            className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-80"
+            aria-hidden
+          />
+        )}
+        {isAdding ? "Redirection vers le paiement…" : "Ajouter au panier"}
+      </button>
+      {buyError && (
+        <p className="mt-2 text-center text-sm font-medium" style={{ color: C.pinkText }}>
+          {buyError}
+        </p>
+      )}
+    </div>
   )
 
   return (
@@ -390,6 +417,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 className="h-auto w-full animate-[fadeIn_.4s_ease] object-cover"
                 width={640}
                 height={640}
+                fetchPriority="high"
+                decoding="async"
               />
               <span
                 className="absolute bottom-4 left-4 rounded-full px-4 py-1.5 text-sm font-semibold shadow-sm"
@@ -411,7 +440,13 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                     boxShadow: i === activeImg ? `0 0 0 2px ${C.ink}` : "none",
                   }}
                 >
-                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -758,6 +793,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 style={{ borderColor: C.lavBorder }}
                 width={1280}
                 height={1600}
+                loading="lazy"
+                decoding="async"
               />
               <figcaption className="mt-3 text-center text-xs" style={{ color: C.muted }}>
                 Résultats pouvant varier selon les personnes.
@@ -781,6 +818,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 className="h-auto w-[320px] rounded-3xl object-cover shadow-xl sm:w-[440px]"
                 width={440}
                 height={440}
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </Reveal>
@@ -909,6 +948,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 key={colorImg}
                 src={colorImg}
                 alt="Taie d'oreiller en soie"
+                loading="lazy"
+                decoding="async"
                 className="h-56 w-full object-cover sm:h-full"
               />
               <div className="p-8 sm:p-10">
@@ -953,6 +994,8 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 className="h-auto w-[320px] rounded-3xl object-cover shadow-xl sm:w-[440px]"
                 width={440}
                 height={440}
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </Reveal>
@@ -1063,10 +1106,17 @@ export default function SoieFunnel({ product, countryCode }: Props) {
           <button
             onClick={handleBuy}
             disabled={isAdding}
-            className="flex-1 rounded-full py-3 text-sm font-bold text-white transition-opacity disabled:opacity-60"
+            aria-busy={isAdding}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-white transition-opacity disabled:opacity-60"
             style={{ backgroundColor: C.ink }}
           >
-            {isAdding ? "Un instant…" : "Ajouter"}
+            {isAdding && (
+              <span
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                aria-hidden
+              />
+            )}
+            {isAdding ? "Redirection…" : "Ajouter"}
           </button>
         </div>
       </div>
@@ -1108,6 +1158,8 @@ function BenefitSplit({
               className="h-auto w-full max-w-[460px] rounded-3xl object-cover shadow-xl"
               width={460}
               height={460}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </Reveal>
