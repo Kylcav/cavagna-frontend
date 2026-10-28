@@ -185,7 +185,7 @@ export default function LatteoFunnel({ product, countryCode }: Props) {
               <div className="absolute inset-0 -z-10 translate-y-6 scale-110 rounded-full bg-[#DDE4CF] blur-2xl" />
               <div className="overflow-hidden rounded-[2rem] border border-[#2B2B24]/8 bg-white shadow-xl">
                 <img
-                  src="/latteo/cj-4.jpg"
+                  src="/latteo/latteo-main.jpg"
                   alt="Machine à lait végétal Lattéo"
                   className="h-auto w-[320px] object-cover sm:w-[420px]"
                   width={420}
@@ -450,7 +450,7 @@ export default function LatteoFunnel({ product, countryCode }: Props) {
           <div className="mx-auto grid max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-[#2B2B24]/10 bg-white shadow-sm lg:grid-cols-2">
             <div className="bg-[#EFF2E6] p-6">
               <img
-                src="/latteo/cj-4.jpg"
+                src="/latteo/latteo-main.jpg"
                 alt="Machine à lait végétal Lattéo"
                 className="mx-auto h-auto w-full max-w-sm rounded-2xl object-cover"
                 width={420}

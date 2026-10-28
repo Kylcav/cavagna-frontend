@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "Lattéo — Du lait végétal frais en 60 secondes",
     description:
       "Fais ton lait végétal maison à partir d'ingrédients bruts. Sans additifs, moins de déchets, plus économique. Prêt en 60 secondes.",
-    images: ["/latteo/cj-1.jpg"],
+    images: ["/latteo/latteo-main.jpg"],
   },
 }
 
