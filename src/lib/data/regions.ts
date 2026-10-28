@@ -14,7 +14,10 @@ export const listRegions = async () => {
     .fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
       method: "GET",
       next,
-      cache: "no-store",
+      // Les régions/devises ne changent quasiment jamais : on met en cache
+      // pour éviter un appel réseau à chaque résolution de région (panier,
+      // checkout, SSR de chaque page) et accélérer tout le parcours.
+      cache: "force-cache",
     })
     .then(({ regions }) => regions)
     .catch(medusaError)

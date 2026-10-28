@@ -224,12 +224,18 @@ export default function SoieFunnel({ product, countryCode }: Props) {
 
   // Préparer la redirection AVANT le clic : on précharge la route checkout
   // (bundle JS + Stripe) et on crée le panier en arrière-plan. Au clic, il ne
-  // reste plus qu'un ajout de ligne -> la page adresse s'ouvre quasi instantanément.
+  // reste plus qu'un ajout de ligne -> la page adresse s'ouvre instantanément.
   const checkoutHref = `/${countryCode}/checkout?step=address`
+  const cartReadyRef = useRef(false)
   useEffect(() => {
     router.prefetch(checkoutHref)
     // Création/réchauffe du panier en tâche de fond (idempotent via cookie).
-    getOrSetCart(countryCode).catch(() => {})
+    // Quand c'est prêt, on pourra naviguer AVANT la fin de l'ajout (optimiste).
+    getOrSetCart(countryCode)
+      .then(() => {
+        cartReadyRef.current = true
+      })
+      .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode])
 
@@ -307,63 +313,69 @@ export default function SoieFunnel({ product, countryCode }: Props) {
     return convertToLocale({ amount: a, currency_code: currency, locale })
   }
 
-  const handleBuy = async () => {
+  const handleBuy = () => {
     if (!selectedVariant?.id || isAdding) return
     setBuyError(null)
     setIsAdding(true)
+
+    // Pixels déclenchés tout de suite (optimiste) — ne bloquent jamais l'achat.
+    const value = amount
+    const cur = currency.toUpperCase()
     try {
-      await addToCart({
-        variantId: selectedVariant.id,
-        quantity: 1,
-        countryCode,
-        metadata: isDuo
-          ? { couleur_1: selectedColor, couleur_2: selectedColor2 }
-          : { couleur_1: selectedColor },
+      fbq("AddToCart", {
+        content_ids: [selectedVariant.id],
+        content_name: product.title,
+        content_type: "product",
+        contents: [{ id: selectedVariant.id, quantity: 1, item_price: value }],
+        value,
+        currency: cur,
       })
+      fbq("InitiateCheckout", {
+        content_ids: [selectedVariant.id],
+        content_name: product.title,
+        value,
+        currency: cur,
+        num_items: 1,
+      })
+      ttqTrack("AddToCart", {
+        content_id: selectedVariant.id,
+        content_name: product.title,
+        content_type: "product",
+        quantity: 1,
+        price: value,
+        value,
+        currency: cur,
+      })
+    } catch {
+      /* le tracking ne doit jamais bloquer l'achat */
+    }
 
-      const value = amount
-      const cur = currency.toUpperCase()
+    const addPromise = addToCart({
+      variantId: selectedVariant.id,
+      quantity: 1,
+      countryCode,
+      metadata: isDuo
+        ? { couleur_1: selectedColor, couleur_2: selectedColor2 }
+        : { couleur_1: selectedColor },
+    })
 
-      try {
-        fbq("AddToCart", {
-          content_ids: [selectedVariant.id],
-          content_name: product.title,
-          content_type: "product",
-          contents: [
-            { id: selectedVariant.id, quantity: 1, item_price: value },
-          ],
-          value,
-          currency: cur,
-        })
-        fbq("InitiateCheckout", {
-          content_ids: [selectedVariant.id],
-          content_name: product.title,
-          value,
-          currency: cur,
-          num_items: 1,
-        })
-        ttqTrack("AddToCart", {
-          content_id: selectedVariant.id,
-          content_name: product.title,
-          content_type: "product",
-          quantity: 1,
-          price: value,
-          value,
-          currency: cur,
-        })
-      } catch {
-        /* le tracking ne doit jamais bloquer l'achat */
-      }
-
-      // On garde l'état "en cours" : la navigation va démonter la page.
-      // On ouvre directement le formulaire d'adresse (?step=address) ; la route
-      // est déjà préchargée donc l'affichage est quasi instantané.
+    if (cartReadyRef.current) {
+      // Panier déjà créé (réchauffé au chargement de la page) : on file au
+      // checkout IMMÉDIATEMENT. L'ajout de l'article se termine en arrière-plan,
+      // puis on rafraîchit le récap de commande. -> clic quasi instantané.
       router.push(checkoutHref)
-    } catch (e) {
-      setIsAdding(false)
-      setBuyError(
-        "Ajout impossible pour le moment. Vérifiez votre connexion et réessayez."
-      )
+      addPromise.then(() => router.refresh()).catch(() => {})
+    } else {
+      // Garde-fou : panier pas encore prêt. On attend l'ajout (qui crée le
+      // panier) avant de naviguer, pour éviter d'arriver sur un panier vide.
+      addPromise
+        .then(() => router.push(checkoutHref))
+        .catch(() => {
+          setIsAdding(false)
+          setBuyError(
+            "Ajout impossible pour le moment. Vérifiez votre connexion et réessayez."
+          )
+        })
     }
   }
 
