@@ -19,10 +19,8 @@ const IMG_TEXTURE = "/soie/soie-texture.jpg"
 const IMG_DETAIL = "/soie/soie-detail.jpg"
 const IMG_CHAMPAGNE = "/soie/soie-champagne.jpg"
 
-// Avant / après : remplacer par de VRAIES photos (ex. frisottis coton vs soie,
-// ou plis d'oreiller). Par défaut : visuels existants, libellés « illustration ».
-const BEFORE_IMG = IMG_DETAIL
-const AFTER_IMG = IMG_HERO
+// Photo avant / après (taie coton vs soie, composée en une image).
+const AVANT_APRES_IMG = "/soie/avant-apres.jpg"
 
 const FORMAT_UNITE = "1 taie"
 const FORMAT_DUO = "Lot de 2"
@@ -747,22 +745,24 @@ export default function SoieFunnel({ product, countryCode }: Props) {
           <Reveal>
             <SectionHead
               eyebrow="Voyez la différence"
-              title="Avant la soie, après la soie"
-              sub="Glissez le curseur pour comparer. Le coton accroche et marque ; la soie glisse et préserve."
+              title="Le coton accroche. La soie glisse."
+              sub="Le coton tire et crée des frottements toute la nuit. La soie laisse glisser les cheveux : moins de frisottis au réveil."
             />
           </Reveal>
           <Reveal delay={120}>
-            <div className="mx-auto mt-10 max-w-3xl">
-              <BeforeAfter
-                beforeSrc={BEFORE_IMG}
-                afterSrc={AFTER_IMG}
-                beforeLabel="Avant"
-                afterLabel="Après"
+            <figure className="mx-auto mt-10 max-w-2xl">
+              <img
+                src={AVANT_APRES_IMG}
+                alt="Comparaison cheveux au réveil : taie en coton (frisottis) vs taie en soie (lisses)"
+                className="w-full rounded-3xl border object-cover shadow-xl"
+                style={{ borderColor: C.lavBorder }}
+                width={1280}
+                height={1600}
               />
-              <p className="mt-3 text-center text-xs" style={{ color: C.muted }}>
-                Illustration. Les résultats varient selon les personnes.
-              </p>
-            </div>
+              <figcaption className="mt-3 text-center text-xs" style={{ color: C.muted }}>
+                Résultats pouvant varier selon les personnes.
+              </figcaption>
+            </figure>
           </Reveal>
         </div>
       </section>
@@ -1077,100 +1077,6 @@ export default function SoieFunnel({ product, countryCode }: Props) {
 }
 
 /* ----------------------------- sous-composants ---------------------------- */
-
-function BeforeAfter({
-  beforeSrc,
-  afterSrc,
-  beforeLabel,
-  afterLabel,
-}: {
-  beforeSrc: string
-  afterSrc: string
-  beforeLabel: string
-  afterLabel: string
-}) {
-  const [pos, setPos] = useState(50)
-  const ref = useRef<HTMLDivElement>(null)
-  const dragging = useRef(false)
-
-  const setFromClientX = (clientX: number) => {
-    const el = ref.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const p = ((clientX - r.left) / r.width) * 100
-    setPos(Math.max(0, Math.min(100, p)))
-  }
-
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      if (dragging.current) setFromClientX(e.clientX)
-    }
-    const up = () => {
-      dragging.current = false
-    }
-    window.addEventListener("pointermove", move)
-    window.addEventListener("pointerup", up)
-    return () => {
-      window.removeEventListener("pointermove", move)
-      window.removeEventListener("pointerup", up)
-    }
-  }, [])
-
-  return (
-    <div
-      ref={ref}
-      onPointerDown={(e) => {
-        dragging.current = true
-        setFromClientX(e.clientX)
-      }}
-      className="relative aspect-[4/3] w-full cursor-ew-resize touch-none select-none overflow-hidden rounded-3xl border bg-white"
-      style={{ borderColor: C.lavBorder }}
-    >
-      <img
-        src={afterSrc}
-        alt={afterLabel}
-        draggable={false}
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <img
-        src={beforeSrc}
-        alt={beforeLabel}
-        draggable={false}
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
-      />
-
-      <span
-        className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold"
-        style={{ backgroundColor: "rgba(43,42,92,.85)", color: "#fff" }}
-      >
-        {beforeLabel}
-      </span>
-      <span
-        className="absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold"
-        style={{ backgroundColor: C.pinkBg, color: C.pinkText }}
-      >
-        {afterLabel}
-      </span>
-
-      {/* Ligne + poignée */}
-      <div
-        className="absolute inset-y-0 w-0.5 bg-white"
-        style={{ left: `${pos}%`, transform: "translateX(-50%)" }}
-      />
-      <div
-        className="absolute top-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg"
-        style={{
-          left: `${pos}%`,
-          transform: "translate(-50%,-50%)",
-          color: C.ink,
-        }}
-      >
-        <Icon path={ICONS.arrows} className="h-5 w-5" />
-      </div>
-    </div>
-  )
-}
 
 function BenefitSplit({
   eyebrow,
