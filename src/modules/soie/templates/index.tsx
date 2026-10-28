@@ -6,7 +6,7 @@ import { ttqTrack } from "@lib/tiktok-pixel"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 type Props = {
   product: HttpTypes.StoreProduct
@@ -164,6 +164,19 @@ export default function SoieFunnel({ product, countryCode }: Props) {
   }, [selectedColor])
   const mainImg = gallery[activeImg] ?? colorImg
 
+  // Galerie : on y remonte quand on change le 1ᵉ coloris, pour que le client
+  // voie tout de suite la nouvelle couleur (utile sur mobile où les pastilles
+  // sont sous l'image). Sur desktop l'image est déjà visible → on ne bouge pas.
+  const galleryRef = useRef<HTMLDivElement>(null)
+  const selectColor1 = (c: string) => {
+    setSelectedColor(c)
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      requestAnimationFrame(() =>
+        galleryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      )
+    }
+  }
+
   const selectedVariant = useMemo(() => {
     return product.variants?.find((v) => {
       const vals = (v.options ?? []).map((o: any) => o.value)
@@ -264,7 +277,11 @@ export default function SoieFunnel({ product, countryCode }: Props) {
       <section className="content-container py-8 lg:py-12">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14">
           {/* ---------- Galerie ---------- */}
-          <div className="lg:sticky lg:top-6 lg:self-start">
+          <div
+            ref={galleryRef}
+            className="lg:sticky lg:top-6 lg:self-start"
+            style={{ scrollMarginTop: "72px" }}
+          >
             <div
               className="relative overflow-hidden rounded-3xl border"
               style={{ borderColor: C.lavBorder, backgroundColor: "#fff" }}
@@ -420,7 +437,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 label={isDuo ? "1ᵉ coloris" : "Coloris"}
                 colors={colors}
                 selected={selectedColor}
-                onSelect={setSelectedColor}
+                onSelect={selectColor1}
               />
               {isDuo && (
                 <ColorRow
