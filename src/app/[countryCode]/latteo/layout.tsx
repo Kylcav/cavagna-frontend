@@ -11,10 +11,10 @@ export default function LatteoLayout({
   children: React.ReactNode
 }) {
   const nav = [
-    { href: "/latteo#comment", label: "Comment ça marche" },
-    { href: "/latteo#recettes", label: "Recettes" },
-    { href: "/latteo#histoire", label: "Notre histoire" },
-    { href: "/latteo#faq", label: "Aide" },
+    { href: "/latteo/comment-ca-marche", label: "Comment ça marche" },
+    { href: "/latteo/recettes", label: "Recettes" },
+    { href: "/latteo/a-propos", label: "Notre histoire" },
+    { href: "/latteo/aide", label: "Aide" },
   ]
 
   return (
@@ -81,12 +81,12 @@ export default function LatteoLayout({
                 </LocalizedClientLink>
               </li>
               <li>
-                <LocalizedClientLink href="/latteo#comment" className="hover:text-[#4F5D43]">
+                <LocalizedClientLink href="/latteo/comment-ca-marche" className="hover:text-[#4F5D43]">
                   Comment ça marche
                 </LocalizedClientLink>
               </li>
               <li>
-                <LocalizedClientLink href="/latteo#recettes" className="hover:text-[#4F5D43]">
+                <LocalizedClientLink href="/latteo/recettes" className="hover:text-[#4F5D43]">
                   Recettes
                 </LocalizedClientLink>
               </li>
@@ -97,12 +97,12 @@ export default function LatteoLayout({
             <div className="text-sm font-semibold text-[#2B2B24]">La marque</div>
             <ul className="mt-3 space-y-2 text-sm text-[#2B2B24]/60">
               <li>
-                <LocalizedClientLink href="/latteo#histoire" className="hover:text-[#4F5D43]">
+                <LocalizedClientLink href="/latteo/a-propos" className="hover:text-[#4F5D43]">
                   Notre histoire
                 </LocalizedClientLink>
               </li>
               <li>
-                <LocalizedClientLink href="/latteo#faq" className="hover:text-[#4F5D43]">
+                <LocalizedClientLink href="/latteo/aide" className="hover:text-[#4F5D43]">
                   Questions fréquentes
                 </LocalizedClientLink>
               </li>
