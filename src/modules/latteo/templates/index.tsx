@@ -458,8 +458,8 @@ export default function LatteoFunnel({ product, countryCode }: Props) {
               />
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {[
-                  "/latteo/hero-lifestyle.jpg",
-                  "/latteo/recette-amande.jpg",
+                  "/latteo/latteo-pour.jpg",
+                  "/latteo/latteo-lifestyle.jpg",
                   "/latteo/ingredients.jpg",
                 ].map((src) => (
                     <img
