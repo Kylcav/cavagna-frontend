@@ -306,6 +306,70 @@ export async function submitPromotionForm(
   }
 }
 
+/**
+ * Sauvegarde les adresses du panier SANS redirection serveur.
+ * Retourne null en cas de succès, ou le message d'erreur sinon.
+ * Permet au client de naviguer de façon optimiste (étape livraison) pendant
+ * que la sauvegarde se termine en arrière-plan.
+ */
+export async function setAddressesData(
+  formData: FormData
+): Promise<string | null> {
+  try {
+    if (!formData) {
+      throw new Error("No form data found when setting addresses")
+    }
+
+    const cartId = await getCartId()
+
+    if (!cartId) {
+      throw new Error("No existing cart found when setting addresses")
+    }
+
+    const data = {
+      shipping_address: {
+        first_name: formData.get("shipping_address.first_name"),
+        last_name: formData.get("shipping_address.last_name"),
+        address_1: formData.get("shipping_address.address_1"),
+        address_2: "",
+        company: formData.get("shipping_address.company"),
+        postal_code: formData.get("shipping_address.postal_code"),
+        city: formData.get("shipping_address.city"),
+        country_code: formData.get("shipping_address.country_code"),
+        province: formData.get("shipping_address.province"),
+        phone: formData.get("shipping_address.phone"),
+      },
+      email: formData.get("email"),
+    } as any
+
+    const sameAsBilling = formData.get("same_as_billing")
+
+    if (sameAsBilling === "on") {
+      data.billing_address = data.shipping_address
+    }
+
+    if (sameAsBilling !== "on") {
+      data.billing_address = {
+        first_name: formData.get("billing_address.first_name"),
+        last_name: formData.get("billing_address.last_name"),
+        address_1: formData.get("billing_address.address_1"),
+        address_2: "",
+        company: formData.get("billing_address.company"),
+        postal_code: formData.get("billing_address.postal_code"),
+        city: formData.get("billing_address.city"),
+        country_code: formData.get("billing_address.country_code"),
+        province: formData.get("billing_address.province"),
+        phone: formData.get("billing_address.phone"),
+      }
+    }
+
+    await updateCart(data)
+    return null
+  } catch (e: any) {
+    return e.message
+  }
+}
+
 export async function setAddresses(currentState: unknown, formData: FormData) {
   try {
     if (!formData) {

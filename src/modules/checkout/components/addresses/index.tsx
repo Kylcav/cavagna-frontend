@@ -1,6 +1,6 @@
 "use client"
 
-import { setAddresses } from "@lib/data/cart"
+import { setAddressesData } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -8,7 +8,7 @@ import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState } from "react"
+import { useState } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
@@ -34,10 +34,40 @@ const Addresses = ({
   )
 
   const handleEdit = () => {
-    router.push(pathname + "?step=address")
+    window.history.pushState(null, "", pathname + "?step=address")
   }
 
-  const [message, formAction] = useActionState(setAddresses, null)
+  const [message, setMessage] = useState<string | null>(null)
+
+  // Soumission optimiste via onSubmit (et NON via une form action React, qui
+  // envelopperait tout dans une transition et différerait la navigation jusqu'à
+  // la fin du server action). La validation HTML native s'exécute avant : si un
+  // champ requis manque, onSubmit ne se déclenche pas.
+  // -> On passe à l'étape livraison IMMÉDIATEMENT (section déjà dans le DOM,
+  //    simple changement de ?step côté client), et on sauvegarde l'adresse en
+  //    arrière-plan. Une fois sauvegardée, router.refresh() met à jour les
+  //    tarifs de livraison.
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    setMessage(null)
+
+    // Flip instantané vers l'étape livraison SANS refetch serveur :
+    // history.pushState change l'URL côté client, et useSearchParams (Next 15)
+    // y réagit -> la section Livraison (déjà dans le DOM) s'ouvre immédiatement.
+    window.history.pushState(null, "", pathname + "?step=delivery")
+
+    // Sauvegarde de l'adresse en arrière-plan, puis rafraîchissement discret
+    // (met à jour le récap d'adresse et les tarifs avec l'adresse saisie).
+    setAddressesData(formData).then((error) => {
+      if (error) {
+        setMessage(error)
+        window.history.pushState(null, "", pathname + "?step=address")
+      } else {
+        router.refresh()
+      }
+    })
+  }
 
   return (
     <div className="bg-white">
@@ -62,7 +92,7 @@ const Addresses = ({
         )}
       </div>
       {isOpen ? (
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <div className="pb-8">
             <ShippingAddress
               customer={customer}

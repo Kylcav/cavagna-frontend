@@ -112,12 +112,14 @@ const shippingMethods = _shippingMethods || []
     }
   }, [availableShippingMethods])
 
+  // Flip d'étape instantané côté client (sans refetch serveur) : la section
+  // cible est déjà rendue dans le DOM et useSearchParams réagit à pushState.
   const handleEdit = () => {
-    router.push(pathname + "?step=delivery", { scroll: false })
+    window.history.pushState(null, "", pathname + "?step=delivery")
   }
 
   const handleSubmit = () => {
-    router.push(pathname + "?step=payment", { scroll: false })
+    window.history.pushState(null, "", pathname + "?step=payment")
   }
 
   const handleSetShippingMethod = async (
