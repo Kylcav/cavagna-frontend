@@ -1,6 +1,6 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
+import { addToCart, getOrSetCart } from "@lib/data/cart"
 import { fbq } from "@lib/meta-pixel"
 import { ttqTrack } from "@lib/tiktok-pixel"
 import { convertToLocale } from "@lib/util/money"
@@ -222,6 +222,17 @@ export default function SoieFunnel({ product, countryCode }: Props) {
   const [isAdding, setIsAdding] = useState(false)
   const [buyError, setBuyError] = useState<string | null>(null)
 
+  // Préparer la redirection AVANT le clic : on précharge la route checkout
+  // (bundle JS + Stripe) et on crée le panier en arrière-plan. Au clic, il ne
+  // reste plus qu'un ajout de ligne -> la page adresse s'ouvre quasi instantanément.
+  const checkoutHref = `/${countryCode}/checkout?step=address`
+  useEffect(() => {
+    router.prefetch(checkoutHref)
+    // Création/réchauffe du panier en tâche de fond (idempotent via cookie).
+    getOrSetCart(countryCode).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryCode])
+
   const colorOption = useMemo(
     () => product.options?.find((o) => o.title === "Couleur"),
     [product.options]
@@ -345,8 +356,9 @@ export default function SoieFunnel({ product, countryCode }: Props) {
       }
 
       // On garde l'état "en cours" : la navigation va démonter la page.
-      // L'écran de chargement du checkout (loading.tsx) prend le relais.
-      router.push(`/${countryCode}/checkout`)
+      // On ouvre directement le formulaire d'adresse (?step=address) ; la route
+      // est déjà préchargée donc l'affichage est quasi instantané.
+      router.push(checkoutHref)
     } catch (e) {
       setIsAdding(false)
       setBuyError(
