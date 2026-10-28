@@ -19,6 +19,11 @@ const IMG_TEXTURE = "/soie/soie-texture.jpg"
 const IMG_DETAIL = "/soie/soie-detail.jpg"
 const IMG_CHAMPAGNE = "/soie/soie-champagne.jpg"
 
+// Avant / après : remplacer par de VRAIES photos (ex. frisottis coton vs soie,
+// ou plis d'oreiller). Par défaut : visuels existants, libellés « illustration ».
+const BEFORE_IMG = IMG_DETAIL
+const AFTER_IMG = IMG_HERO
+
 const FORMAT_UNITE = "1 taie"
 const FORMAT_DUO = "Lot de 2"
 
@@ -65,7 +70,6 @@ const FALLBACK_PRICE: Record<string, number> = {
 }
 
 /* ------------------------------- palette --------------------------------- */
-// Crème + bleu marine + lavande + rose (inspiration literie premium).
 const C = {
   bg: "#FAF6F0",
   ink: "#2B2A5C",
@@ -75,6 +79,90 @@ const C = {
   lavText: "#6A61B0",
   pinkBg: "#F6DEE4",
   pinkText: "#B55C74",
+}
+
+/* ----------------------------- animations -------------------------------- */
+
+function useInView(threshold = 0.18) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setInView(true)
+          io.disconnect()
+        }
+      },
+      { threshold }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [threshold])
+  return { ref, inView }
+}
+
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode
+  delay?: number
+  className?: string
+}) {
+  const { ref, inView } = useInView()
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "none" : "translateY(26px)",
+        transition: `opacity .7s cubic-bezier(.22,1,.36,1) ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function CountUp({
+  to,
+  suffix = "",
+  duration = 1300,
+}: {
+  to: number
+  suffix?: string
+  duration?: number
+}) {
+  const { ref, inView } = useInView(0.4)
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    if (!inView) return
+    let raf = 0
+    const start = performance.now()
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / duration)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setN(Math.round(eased * to))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [inView, to, duration])
+  return (
+    <span ref={ref}>
+      {n}
+      {suffix}
+    </span>
+  )
 }
 
 /* ------------------------------- icônes ---------------------------------- */
@@ -124,7 +212,9 @@ const ICONS = {
   box: "M4 7l8-4 8 4-8 4-8-4z|M4 7v10l8 4 8-4V7|M12 11v10",
   droplet: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",
   refresh: "M4 12a8 8 0 0 1 13.7-5.6L20 8|M20 4v4h-4|M20 12a8 8 0 0 1-13.7 5.6L4 16|M4 20v-4h4",
-  spark: "M12 3l1.7 4.8L18.5 9.5 13.7 11 12 16l-1.7-5L5.5 9.5l4.8-1.7L12 3z",
+  gift: "M4 11h16v9H4z|M4 11V8h16v3|M12 8v12|M12 8C10.5 8 8 7.5 8 5.8 8 4.5 9 4 10 4c2 0 2 4 2 4zM12 8c1.5 0 4-.5 4-2.2C16 4.5 15 4 14 4c-2 0-2 4-2 4z",
+  arrows: "M8 7l-4 5 4 5|M16 7l4 5-4 5",
+  plane: "M2 12l20-8-8 20-2-8-10-4z",
 }
 
 /* --------------------------------- page ---------------------------------- */
@@ -152,8 +242,6 @@ export default function SoieFunnel({ product, countryCode }: Props) {
   const isDuo = selectedFormat === FORMAT_DUO
   const colorImg = COLOR_IMG[selectedColor] ?? IMG_HERO
 
-  // Galerie : photo du coloris + visuels produit. L'image active revient sur
-  // le coloris choisi dès qu'on change de couleur.
   const gallery = useMemo(
     () => [colorImg, IMG_TEXTURE, IMG_DETAIL, IMG_CHAMPAGNE],
     [colorImg]
@@ -164,9 +252,6 @@ export default function SoieFunnel({ product, countryCode }: Props) {
   }, [selectedColor])
   const mainImg = gallery[activeImg] ?? colorImg
 
-  // Galerie : on y remonte quand on change le 1ᵉ coloris, pour que le client
-  // voie tout de suite la nouvelle couleur (utile sur mobile où les pastilles
-  // sont sous l'image). Sur desktop l'image est déjà visible → on ne bouge pas.
   const galleryRef = useRef<HTMLDivElement>(null)
   const selectColor1 = (c: string) => {
     setSelectedColor(c)
@@ -259,9 +344,23 @@ export default function SoieFunnel({ product, countryCode }: Props) {
     }
   }
 
-  const scrollToAvis = () => {
+  const scrollToAvis = () =>
     document.getElementById("avis")?.scrollIntoView({ behavior: "smooth" })
-  }
+
+  const BuyCTA = ({ variant = "ink" }: { variant?: "ink" | "white" }) => (
+    <button
+      onClick={handleBuy}
+      disabled={isAdding}
+      className="w-full rounded-full py-4 text-base font-bold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+      style={
+        variant === "white"
+          ? { backgroundColor: "#fff", color: C.ink }
+          : { backgroundColor: C.ink, color: "#fff" }
+      }
+    >
+      {isAdding ? "Un instant…" : "Ajouter au panier"}
+    </button>
+  )
 
   return (
     <div style={{ backgroundColor: C.bg, color: C.ink }}>
@@ -290,7 +389,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                 key={mainImg}
                 src={mainImg}
                 alt={`Taie d'oreiller en soie de mûrier — ${selectedColor}`}
-                className="h-auto w-full object-cover"
+                className="h-auto w-full animate-[fadeIn_.4s_ease] object-cover"
                 width={640}
                 height={640}
               />
@@ -308,18 +407,13 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                   key={src + i}
                   type="button"
                   onClick={() => setActiveImg(i)}
-                  className="h-20 w-20 overflow-hidden rounded-2xl border transition-all"
+                  className="h-20 w-20 overflow-hidden rounded-2xl border transition-all hover:scale-105"
                   style={{
                     borderColor: i === activeImg ? C.ink : C.lavBorder,
-                    boxShadow:
-                      i === activeImg ? `0 0 0 2px ${C.ink}` : "none",
+                    boxShadow: i === activeImg ? `0 0 0 2px ${C.ink}` : "none",
                   }}
                 >
-                  <img
-                    src={src}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={src} alt="" className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -357,11 +451,7 @@ export default function SoieFunnel({ product, countryCode }: Props) {
             >
               <span className="flex" style={{ color: C.lavText }}>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Icon
-                    key={i}
-                    path={ICONS.star}
-                    className="h-4 w-4 fill-current"
-                  />
+                  <Icon key={i} path={ICONS.star} className="h-4 w-4 fill-current" />
                 ))}
               </span>
               <span className="text-sm underline" style={{ color: C.muted }}>
@@ -476,14 +566,9 @@ export default function SoieFunnel({ product, countryCode }: Props) {
             </div>
 
             {/* Add to cart */}
-            <button
-              onClick={handleBuy}
-              disabled={isAdding}
-              className="mt-6 w-full rounded-full py-4 text-base font-bold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ backgroundColor: C.ink }}
-            >
-              {isAdding ? "Un instant…" : "Ajouter au panier"}
-            </button>
+            <div className="mt-6">
+              <BuyCTA />
+            </div>
 
             <div
               className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm"
@@ -493,22 +578,80 @@ export default function SoieFunnel({ product, countryCode }: Props) {
               <TrustInline icon={ICONS.refresh} label="Retours faciles" />
               <TrustInline icon={ICONS.truck} label="Livraison offerte" />
             </div>
+
+            {/* Détails produit & entretien (accordéon) */}
+            <div className="mt-8">
+              <h2 className="mb-2 text-lg font-bold">Détails produit & entretien</h2>
+              <div
+                className="divide-y rounded-2xl border"
+                style={{ borderColor: C.lavBorder }}
+              >
+                <Disclosure title="Description" defaultOpen>
+                  <p>
+                    La taie CAVAGNA est confectionnée en soie de mûrier 100%,
+                    tissage satin 22 Momme. La face en contact avec la peau et
+                    les cheveux glisse au lieu de tirer : moins de frisottis,
+                    moins de plis d'oreiller au réveil. Peu absorbante, elle aide
+                    à garder vos soins de nuit sur la peau. Hypoallergénique,
+                    thermorégulante, sans teintures agressives.
+                  </p>
+                </Disclosure>
+                <Disclosure title="Bénéfices clés">
+                  <ul className="space-y-2">
+                    <KeyBenefit text="Anti-frisottis : réduit les frottements, aide à limiter la casse." />
+                    <KeyBenefit text="Douce pour la peau : aide à préserver l'éclat et à réduire les plis d'oreiller." />
+                    <KeyBenefit text="Thermorégulante : fraîche en été, douce en hiver." />
+                    <KeyBenefit text="Hypoallergénique : convient aux peaux sensibles." />
+                    <KeyBenefit text="Saine : absorbe moins l'humidité et vos soins de nuit." />
+                  </ul>
+                </Disclosure>
+                <Disclosure title="Caractéristiques">
+                  <dl className="space-y-2">
+                    <SpecLine label="Matière" value="Soie de mûrier 100% · 22 Momme" />
+                    <SpecLine label="Dimensions" value="48 × 74 cm (format standard)" />
+                    <SpecLine label="Fermeture" value="Enveloppe, sans zip" />
+                    <SpecLine label="Tissage" value="Satin, toucher fluide" />
+                    <SpecLine label="Coloris" value="12 teintes élégantes" />
+                  </dl>
+                </Disclosure>
+                <Disclosure title="Entretien">
+                  <p>
+                    Lavage délicat à froid (30°C max), idéalement en filet.
+                    Séchage à l'air libre, à plat. Pas de sèche-linge ni
+                    d'adoucissant, à l'écart des sources de chaleur, pour
+                    préserver la soie.
+                  </p>
+                </Disclosure>
+              </div>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* ======================= BANDE CONFIANCE ======================== */}
+      <section className="border-y" style={{ borderColor: C.lavBorder }}>
+        <div className="content-container grid grid-cols-2 gap-6 py-6 text-center sm:grid-cols-4">
+          <MiniTrust icon={ICONS.leaf} label="Soie de mûrier 100%" />
+          <MiniTrust icon={ICONS.truck} label="Livraison offerte" />
+          <MiniTrust icon={ICONS.shield} label="Satisfait ou remboursé 30 j" />
+          <MiniTrust icon={ICONS.lock} label="Paiement sécurisé" />
         </div>
       </section>
 
       {/* ========================= BANDE STATS (marine) ================== */}
       <section style={{ backgroundColor: C.ink }} className="text-white">
         <div className="content-container py-12 sm:py-16">
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-            La différence soie
-          </span>
-          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-            Pas juste douce. Douce comme la soie.
-          </h2>
+          <Reveal>
+            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+              La différence soie
+            </span>
+            <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+              Pas juste douce. Douce comme la soie.
+            </h2>
+          </Reveal>
           <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
-            <Stat value="100%" label="Soie de mûrier" />
-            <Stat value="22" label="Momme (densité)" />
+            <Stat numeric={100} suffix="%" label="Soie de mûrier" />
+            <Stat numeric={22} label="Momme (densité)" />
             <Stat value="6A" label="Qualité de soie" />
             <Stat value="Oui" label="Lavable en machine" />
           </div>
@@ -517,149 +660,246 @@ export default function SoieFunnel({ product, countryCode }: Props) {
 
       {/* ============================= BÉNÉFICES ======================== */}
       <section className="content-container py-16 sm:py-24">
-        <SectionHead
-          eyebrow="Pourquoi la soie"
-          title="Un seul geste, trois bienfaits chaque nuit"
-          sub="La soie de mûrier n'est pas qu'un luxe : c'est un vrai soin beauté pendant votre sommeil."
-        />
+        <Reveal>
+          <SectionHead
+            eyebrow="Pourquoi la soie"
+            title="Un seul geste, trois bienfaits chaque nuit"
+            sub="La soie de mûrier n'est pas qu'un luxe : c'est un vrai soin beauté pendant votre sommeil."
+          />
+        </Reveal>
         <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <FeatureCard
-            icon={ICONS.hair}
-            n="01"
-            title="Cheveux lissés"
-            text="La surface ultra-douce réduit les frottements : moins de frisottis, moins de casse, et une coiffure qui tient plus longtemps."
-          />
-          <FeatureCard
-            icon={ICONS.skin}
-            n="02"
-            title="Peau préservée"
-            text="Fini les plis d'oreiller marqués au réveil. La soie glisse au lieu de tirer la peau et aide à préserver son éclat."
-          />
-          <FeatureCard
-            icon={ICONS.temp}
-            n="03"
-            title="Thermorégulante"
-            text="Fraîche en été, douce en hiver : la soie régule naturellement la température pour des nuits plus confortables."
-          />
-          <FeatureCard
-            icon={ICONS.leaf}
-            n="04"
-            title="Saine & hypoallergénique"
-            text="Fibre naturelle qui absorbe moins l'humidité et vos soins de nuit, et retient moins les acariens et poussières."
-          />
+          {[
+            {
+              icon: ICONS.hair,
+              n: "01",
+              title: "Cheveux lissés",
+              text: "La surface ultra-douce réduit les frottements : moins de frisottis, moins de casse, une coiffure qui tient plus longtemps.",
+            },
+            {
+              icon: ICONS.skin,
+              n: "02",
+              title: "Peau préservée",
+              text: "Fini les plis d'oreiller marqués au réveil. La soie glisse au lieu de tirer la peau et aide à préserver son éclat.",
+            },
+            {
+              icon: ICONS.temp,
+              n: "03",
+              title: "Thermorégulante",
+              text: "Fraîche en été, douce en hiver : la soie régule naturellement la température pour des nuits plus confortables.",
+            },
+            {
+              icon: ICONS.leaf,
+              n: "04",
+              title: "Saine & hypoallergénique",
+              text: "Fibre naturelle qui absorbe moins l'humidité et vos soins de nuit, et retient moins les acariens et poussières.",
+            },
+          ].map((f, i) => (
+            <Reveal key={f.n} delay={i * 90}>
+              <FeatureCard {...f} />
+            </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* ========================= PROBLÈME / SOLUTION =================== */}
+      {/* ==================== BÉNÉFICES ALTERNÉS (splits) ================ */}
+      <BenefitSplit
+        eyebrow="Au réveil"
+        title="Vos cheveux vous disent merci"
+        text="Moins de frottements contre l'oreiller, moins de temps à démêler le matin. Offrez à vos cheveux un endroit plus doux où se reposer."
+        bullets={[
+          "Une surface lisse qui réduit les frottements",
+          "Douce sur cheveux raides, ondulés ou bouclés",
+          "Aide à préserver votre coiffure toute la nuit",
+        ]}
+        img={colorImg}
+        onCta={scrollToAvis}
+      />
+      <BenefitSplit
+        reverse
+        eyebrow="Votre routine du soir"
+        title="Vos soins restent là où il faut : sur votre peau"
+        text="Vous prenez soin de votre peau le soir. La soie, peu absorbante, aide à garder l'hydratation et vos produits sur la peau — pas dans la taie."
+        bullets={[
+          "Soie peu absorbante pour votre routine de nuit",
+          "Surface lisse qui aide à réduire les frottements",
+          "Soie de mûrier naturellement hypoallergénique",
+        ]}
+        img={IMG_DETAIL}
+        onCta={scrollToAvis}
+        bg={C.lavBg}
+      />
+      <BenefitSplit
+        eyebrow="Pour les amoureuses du côté frais"
+        title="Moins retourner l'oreiller. Plus l'adorer."
+        text="Le côté frais ne devrait pas être si difficile à trouver. Naturellement respirante et thermorégulante, la soie offre un endroit confortable, nuit après nuit."
+        bullets={[
+          "Soie naturellement respirante",
+          "Aide à réguler la température",
+          "Un fini doux pour votre routine du coucher",
+        ]}
+        img={IMG_TEXTURE}
+        onCta={scrollToAvis}
+      />
+
+      {/* ============================ AVANT / APRÈS ===================== */}
       <section style={{ backgroundColor: C.lavBg }}>
-        <div className="content-container grid grid-cols-1 items-center gap-12 py-16 sm:py-24 lg:grid-cols-2">
-          <div className="relative flex justify-center lg:order-2">
-            <div
-              className="rounded-3xl border bg-white p-3"
-              style={{ borderColor: C.lavBorder }}
-            >
-              <img
-                src={IMG_TEXTURE}
-                alt="Texture de la soie de mûrier"
-                className="h-auto w-[300px] rounded-2xl object-cover sm:w-[400px]"
-                width={400}
-                height={400}
-              />
-            </div>
-          </div>
-          <div className="lg:order-1">
+        <div className="content-container py-16 sm:py-24">
+          <Reveal>
             <SectionHead
-              align="left"
-              eyebrow="Le coton vous trahit"
-              title="Votre taie en coton abîme vos cheveux et votre peau"
-              sub="Le coton accroche, tire et absorbe. Chaque nuit, il crée des frottements qui cassent le cheveu, marquent la peau et aspirent vos crèmes de nuit."
+              eyebrow="Voyez la différence"
+              title="Avant la soie, après la soie"
+              sub="Glissez le curseur pour comparer. Le coton accroche et marque ; la soie glisse et préserve."
             />
-            <ul className="mt-8 space-y-4">
-              <SolutionLine text="La soie glisse : vos cheveux ne s'emmêlent plus pendant la nuit." />
-              <SolutionLine text="Moins de plis d'oreiller — vous vous réveillez le visage reposé." />
-              <SolutionLine text="Vos soins restent sur votre peau, pas dans la taie." />
-              <SolutionLine text="Un petit geste, une vraie différence visible en quelques nuits." />
-            </ul>
-          </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <div className="mx-auto mt-10 max-w-3xl">
+              <BeforeAfter
+                beforeSrc={BEFORE_IMG}
+                afterSrc={AFTER_IMG}
+                beforeLabel="Avant"
+                afterLabel="Après"
+              />
+              <p className="mt-3 text-center text-xs" style={{ color: C.muted }}>
+                Illustration. Les résultats varient selon les personnes.
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* =========================== DÉTAILS / SPECS ==================== */}
       <section className="content-container py-16 sm:py-24">
-        <SectionHead eyebrow="Les détails" title="Une qualité qui se voit et se touche" />
+        <Reveal>
+          <SectionHead eyebrow="Les détails" title="Une qualité qui se voit et se touche" />
+        </Reveal>
         <div className="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div className="flex justify-center">
-            <img
-              src={IMG_DETAIL}
-              alt="Finitions de la taie en soie"
-              className="h-auto w-[320px] rounded-3xl object-cover shadow-xl sm:w-[440px]"
-              width={440}
-              height={440}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-            <Spec icon={ICONS.leaf} label="Matière" value="Soie de mûrier 100%" />
-            <Spec icon={ICONS.ruler} label="Dimensions" value="48 × 74 cm" />
-            <Spec icon={ICONS.box} label="Fermeture" value="Enveloppe (sans zip)" />
-            <Spec icon={ICONS.droplet} label="Tissage" value="Satin, toucher fluide" />
-            <Spec icon={ICONS.temp} label="Confort" value="Thermorégulant" />
-            <Spec icon={ICONS.heart} label="Coloris" value="12 teintes élégantes" />
+          <Reveal>
+            <div className="flex justify-center">
+              <img
+                src={IMG_DETAIL}
+                alt="Finitions de la taie en soie"
+                className="h-auto w-[320px] rounded-3xl object-cover shadow-xl sm:w-[440px]"
+                width={440}
+                height={440}
+              />
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+              <Spec icon={ICONS.leaf} label="Matière" value="Soie de mûrier 100%" />
+              <Spec icon={ICONS.ruler} label="Dimensions" value="48 × 74 cm" />
+              <Spec icon={ICONS.box} label="Fermeture" value="Enveloppe (sans zip)" />
+              <Spec icon={ICONS.droplet} label="Tissage" value="Satin, toucher fluide" />
+              <Spec icon={ICONS.temp} label="Confort" value="Thermorégulant" />
+              <Spec icon={ICONS.heart} label="Coloris" value="12 teintes élégantes" />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============================== ENTRETIEN ======================= */}
+      <section style={{ backgroundColor: C.lavBg }}>
+        <div className="content-container py-16 sm:py-24">
+          <Reveal>
+            <SectionHead eyebrow="Un rien d'attention" title="L'entretien de la soie, tout simple" />
+          </Reveal>
+          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              {
+                n: "1",
+                icon: ICONS.wash,
+                title: "Lavez en douceur",
+                text: "Eau froide, cycle délicat et une lessive douce adaptée à la soie.",
+              },
+              {
+                n: "2",
+                icon: ICONS.shield,
+                title: "Protégez-la",
+                text: "Un filet de lavage garde votre soie à l'abri des zips et accrocs.",
+              },
+              {
+                n: "3",
+                icon: ICONS.droplet,
+                title: "Séchage à l'air",
+                text: "Séchez à plat, à l'air libre. Gardez la soie loin de la chaleur.",
+              },
+            ].map((s, i) => (
+              <Reveal key={s.n} delay={i * 90}>
+                <CareCard {...s} />
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ============================== COMMENT ========================= */}
-      <section style={{ backgroundColor: C.lavBg }}>
-        <div className="content-container py-16 sm:py-24">
+      {/* ============================== USAGE =========================== */}
+      <section className="content-container py-16 sm:py-24">
+        <Reveal>
           <SectionHead eyebrow="Si simple" title="En 3 étapes" />
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <StepCard
-              n="1"
-              title="Choisissez votre teinte"
-              text="12 coloris élégants pour s'accorder à votre chambre et à votre style."
-            />
-            <StepCard
-              n="2"
-              title="Glissez-la sur l'oreiller"
-              text="Fermeture enveloppe : elle se met en place en un geste et reste bien en place."
-            />
-            <StepCard
-              n="3"
-              title="Dormez, elle fait le reste"
-              text="Cheveux plus lisses, peau préservée. La différence se voit dès les premières nuits."
-            />
-          </div>
+        </Reveal>
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {[
+            {
+              n: "1",
+              title: "Choisissez votre teinte",
+              text: "12 coloris élégants pour s'accorder à votre chambre et à votre style.",
+            },
+            {
+              n: "2",
+              title: "Glissez-la sur l'oreiller",
+              text: "Fermeture enveloppe : elle se met en place en un geste et reste bien en place.",
+            },
+            {
+              n: "3",
+              title: "Dormez, elle fait le reste",
+              text: "Cheveux plus lisses, peau préservée. La différence se voit dès les premières nuits.",
+            },
+          ].map((s, i) => (
+            <Reveal key={s.n} delay={i * 90}>
+              <StepCard {...s} />
+            </Reveal>
+          ))}
         </div>
       </section>
 
       {/* ============================== AVIS ============================ */}
-      <section id="avis" className="content-container py-16 sm:py-24">
-        <SectionHead eyebrow="Témoignages" title="Elles ne reviendraient pas au coton" />
-        <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-3">
-          <Review
-            initial="C"
-            author="Camille"
-            city="Lausanne"
-            text="Mes cheveux sont nettement moins emmêlés le matin. Je ne dormirai plus jamais sans."
-          />
-          <Review
-            initial="S"
-            author="Sarah"
-            city="Genève"
-            text="Fini les marques d'oreiller sur le visage. La qualité de la soie est vraiment au rendez-vous."
-          />
-          <Review
-            initial="L"
-            author="Léa"
-            city="Annecy"
-            text="J'ai pris le lot de 2 pour en avoir une au lavage. Douce, élégante, j'adore la couleur."
-          />
+      <section id="avis" style={{ backgroundColor: C.lavBg }}>
+        <div className="content-container py-16 sm:py-24">
+          <Reveal>
+            <SectionHead eyebrow="Témoignages" title="Elles ne reviendraient pas au coton" />
+          </Reveal>
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-3">
+            {[
+              {
+                initial: "C",
+                author: "Camille",
+                city: "Lausanne",
+                text: "Mes cheveux sont nettement moins emmêlés le matin. Je ne dormirai plus jamais sans.",
+              },
+              {
+                initial: "S",
+                author: "Sarah",
+                city: "Genève",
+                text: "Fini les marques d'oreiller sur le visage. La qualité de la soie est vraiment au rendez-vous.",
+              },
+              {
+                initial: "L",
+                author: "Léa",
+                city: "Annecy",
+                text: "J'ai pris le lot de 2 pour en avoir une au lavage. Douce, élégante, j'adore la couleur.",
+              },
+            ].map((r, i) => (
+              <Reveal key={r.author} delay={i * 90}>
+                <Review {...r} />
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ============================== OFFRE =========================== */}
-      <section style={{ backgroundColor: C.lavBg }}>
-        <div className="content-container py-16 sm:py-24">
+      <section className="content-container py-16 sm:py-24">
+        <Reveal>
           <div
             className="mx-auto max-w-3xl overflow-hidden rounded-3xl border bg-white"
             style={{ borderColor: C.lavBorder }}
@@ -693,70 +933,113 @@ export default function SoieFunnel({ product, countryCode }: Props) {
                     {compareLabel}
                   </span>
                 </div>
-                <button
-                  onClick={handleBuy}
-                  disabled={isAdding}
-                  className="mt-5 w-full rounded-full py-4 text-base font-bold text-white transition-opacity disabled:opacity-60"
-                  style={{ backgroundColor: C.ink }}
-                >
-                  {isAdding ? "Un instant…" : "Ajouter au panier"}
-                </button>
+                <div className="mt-5">
+                  <BuyCTA />
+                </div>
               </div>
             </div>
           </div>
+        </Reveal>
+      </section>
+
+      {/* ============================== CADEAU ========================== */}
+      <section style={{ backgroundColor: C.lavBg }}>
+        <div className="content-container grid grid-cols-1 items-center gap-12 py-16 sm:py-24 lg:grid-cols-2">
+          <Reveal>
+            <div className="flex justify-center lg:order-2">
+              <img
+                src={IMG_CHAMPAGNE}
+                alt="Taie en soie, idée cadeau"
+                className="h-auto w-[320px] rounded-3xl object-cover shadow-xl sm:w-[440px]"
+                width={440}
+                height={440}
+              />
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <div className="lg:order-1">
+              <SectionHead
+                align="left"
+                eyebrow="Un cadeau qu'elle adorera"
+                title="Une pour vous. Une pour celle que vous aimez."
+                sub="Le cadeau d'une meilleure nuit ne se démode jamais : anniversaire, remerciement, une attention pour Maman ou l'amie qui a déjà tout."
+              />
+              <ul className="mt-8 space-y-4">
+                <SolutionLine text="12 coloris pour toutes les personnalités" />
+                <SolutionLine text="Une attention chic pour toutes les occasions" />
+                <SolutionLine text="Lot de 2 : offrez-en une, gardez l'autre" />
+              </ul>
+              <div className="mt-8 max-w-xs">
+                <BuyCTA />
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* =============================== FAQ ============================ */}
       <section className="content-container py-16 sm:py-24">
-        <SectionHead eyebrow="Vous vous demandez…" title="Questions fréquentes" />
-        <div
-          className="mx-auto mt-10 max-w-3xl divide-y border-y"
-          style={{ borderColor: C.lavBorder }}
-        >
-          <Faq
-            q="Est-ce de la vraie soie ?"
-            a="Oui, la face en contact avec la peau et les cheveux est en soie de mûrier 100%, le même type de soie utilisé par les grandes marques de literie en soie."
-          />
-          <Faq
-            q="Quelle taille d'oreiller ?"
-            a="La taie mesure 48 × 74 cm, le format rectangulaire standard le plus courant. Fermeture enveloppe pour un maintien parfait, sans zip qui gêne."
-          />
-          <Faq
-            q="Comment l'entretenir ?"
-            a="Lavage délicat à froid (30°C max), idéalement en filet, séchage à l'air libre. Pas de sèche-linge ni d'adoucissant pour préserver la soie."
-          />
-          <Faq
-            q="Combien de temps pour la livraison ?"
-            a="La livraison est offerte. Comptez environ 10 à 15 jours de délai. Un numéro de suivi vous est envoyé dès l'expédition."
-          />
-          <Faq
-            q="Pourquoi le lot de 2 ?"
-            a="C'est l'idéal : une sur l'oreiller pendant que l'autre passe au lavage, ou une seconde teinte pour varier. Et vous économisez 29 CHF."
-          />
-        </div>
+        <Reveal>
+          <SectionHead eyebrow="Vous vous demandez…" title="Questions fréquentes" />
+        </Reveal>
+        <Reveal delay={120}>
+          <div
+            className="mx-auto mt-10 max-w-3xl divide-y border-y"
+            style={{ borderColor: C.lavBorder }}
+          >
+            <Disclosure title="Est-ce de la vraie soie ?">
+              <p>
+                Oui, la face en contact avec la peau et les cheveux est en soie
+                de mûrier 100%, le même type de soie utilisé par les grandes
+                marques de literie en soie.
+              </p>
+            </Disclosure>
+            <Disclosure title="Quelle taille d'oreiller ?">
+              <p>
+                La taie mesure 48 × 74 cm, le format rectangulaire standard le
+                plus courant. Fermeture enveloppe pour un maintien parfait, sans
+                zip qui gêne.
+              </p>
+            </Disclosure>
+            <Disclosure title="Comment l'entretenir ?">
+              <p>
+                Lavage délicat à froid (30°C max), idéalement en filet, séchage à
+                l'air libre. Pas de sèche-linge ni d'adoucissant pour préserver la
+                soie.
+              </p>
+            </Disclosure>
+            <Disclosure title="Combien de temps pour la livraison ?">
+              <p>
+                La livraison est offerte. Comptez environ 10 à 15 jours de délai.
+                Un numéro de suivi vous est envoyé dès l'expédition.
+              </p>
+            </Disclosure>
+            <Disclosure title="Pourquoi le lot de 2 ?">
+              <p>
+                C'est l'idéal : une sur l'oreiller pendant que l'autre passe au
+                lavage, ou une seconde teinte pour varier. Et vous économisez 29
+                CHF.
+              </p>
+            </Disclosure>
+          </div>
+        </Reveal>
       </section>
 
       {/* ============================ CTA FINAL ========================= */}
       <section style={{ backgroundColor: C.ink }} className="text-white">
         <div className="content-container py-20 text-center">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
-            Offrez à vos nuits le toucher de la soie.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/70">
-            Cheveux sublimés, peau préservée — à partir de{" "}
-            {priceForFormat(FORMAT_UNITE)}. Livraison offerte.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={handleBuy}
-              disabled={isAdding}
-              className="rounded-full bg-white px-10 py-4 text-base font-bold transition-opacity disabled:opacity-60"
-              style={{ color: C.ink }}
-            >
-              {isAdding ? "Un instant…" : "Ajouter au panier"}
-            </button>
-          </div>
+          <Reveal>
+            <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+              Offrez à vos nuits le toucher de la soie.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-white/70">
+              Cheveux sublimés, peau préservée — à partir de{" "}
+              {priceForFormat(FORMAT_UNITE)}. Livraison offerte.
+            </p>
+            <div className="mx-auto mt-8 max-w-xs">
+              <BuyCTA variant="white" />
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -787,11 +1070,264 @@ export default function SoieFunnel({ product, countryCode }: Props) {
           </button>
         </div>
       </div>
+
+      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}`}</style>
     </div>
   )
 }
 
 /* ----------------------------- sous-composants ---------------------------- */
+
+function BeforeAfter({
+  beforeSrc,
+  afterSrc,
+  beforeLabel,
+  afterLabel,
+}: {
+  beforeSrc: string
+  afterSrc: string
+  beforeLabel: string
+  afterLabel: string
+}) {
+  const [pos, setPos] = useState(50)
+  const ref = useRef<HTMLDivElement>(null)
+  const dragging = useRef(false)
+
+  const setFromClientX = (clientX: number) => {
+    const el = ref.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const p = ((clientX - r.left) / r.width) * 100
+    setPos(Math.max(0, Math.min(100, p)))
+  }
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      if (dragging.current) setFromClientX(e.clientX)
+    }
+    const up = () => {
+      dragging.current = false
+    }
+    window.addEventListener("pointermove", move)
+    window.addEventListener("pointerup", up)
+    return () => {
+      window.removeEventListener("pointermove", move)
+      window.removeEventListener("pointerup", up)
+    }
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      onPointerDown={(e) => {
+        dragging.current = true
+        setFromClientX(e.clientX)
+      }}
+      className="relative aspect-[4/3] w-full cursor-ew-resize touch-none select-none overflow-hidden rounded-3xl border bg-white"
+      style={{ borderColor: C.lavBorder }}
+    >
+      <img
+        src={afterSrc}
+        alt={afterLabel}
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <img
+        src={beforeSrc}
+        alt={beforeLabel}
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+      />
+
+      <span
+        className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold"
+        style={{ backgroundColor: "rgba(43,42,92,.85)", color: "#fff" }}
+      >
+        {beforeLabel}
+      </span>
+      <span
+        className="absolute right-3 top-3 rounded-full px-2.5 py-1 text-xs font-bold"
+        style={{ backgroundColor: C.pinkBg, color: C.pinkText }}
+      >
+        {afterLabel}
+      </span>
+
+      {/* Ligne + poignée */}
+      <div
+        className="absolute inset-y-0 w-0.5 bg-white"
+        style={{ left: `${pos}%`, transform: "translateX(-50%)" }}
+      />
+      <div
+        className="absolute top-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg"
+        style={{
+          left: `${pos}%`,
+          transform: "translate(-50%,-50%)",
+          color: C.ink,
+        }}
+      >
+        <Icon path={ICONS.arrows} className="h-5 w-5" />
+      </div>
+    </div>
+  )
+}
+
+function BenefitSplit({
+  eyebrow,
+  title,
+  text,
+  bullets,
+  img,
+  reverse,
+  bg,
+  onCta,
+}: {
+  eyebrow: string
+  title: string
+  text: string
+  bullets: string[]
+  img: string
+  reverse?: boolean
+  bg?: string
+  onCta?: () => void
+}) {
+  return (
+    <section style={bg ? { backgroundColor: bg } : undefined}>
+      <div className="content-container grid grid-cols-1 items-center gap-12 py-16 sm:py-24 lg:grid-cols-2">
+        <Reveal className={reverse ? "lg:order-2" : ""}>
+          <div className="flex justify-center">
+            <img
+              src={img}
+              alt={title}
+              className="h-auto w-full max-w-[460px] rounded-3xl object-cover shadow-xl"
+              width={460}
+              height={460}
+            />
+          </div>
+        </Reveal>
+        <Reveal delay={120} className={reverse ? "lg:order-1" : ""}>
+          <div>
+            <SectionHead align="left" eyebrow={eyebrow} title={title} sub={text} />
+            <ul className="mt-8 space-y-4">
+              {bullets.map((b) => (
+                <SolutionLine key={b} text={b} />
+              ))}
+            </ul>
+            {onCta && (
+              <button
+                onClick={onCta}
+                className="mt-8 inline-flex items-center gap-2 text-sm font-bold underline"
+                style={{ color: C.lavText }}
+              >
+                Voir les avis →
+              </button>
+            )}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+function Disclosure({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="px-4 py-4 first:rounded-t-2xl last:rounded-b-2xl">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-4 text-left"
+        aria-expanded={open}
+      >
+        <span className="text-base font-semibold">{title}</span>
+        <span
+          className={`flex h-7 w-7 flex-none items-center justify-center rounded-full border transition-transform ${
+            open ? "rotate-45" : ""
+          }`}
+          style={{ borderColor: C.lavBorder }}
+        >
+          <Icon path={ICONS.plus} className="h-4 w-4" />
+        </span>
+      </button>
+      <div
+        className={`grid transition-all duration-300 ${
+          open ? "mt-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div
+          className="overflow-hidden text-sm leading-relaxed"
+          style={{ color: C.muted }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function KeyBenefit({ text }: { text: string }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <span
+        className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full"
+        style={{ backgroundColor: C.lavBg, color: C.lavText }}
+      >
+        <Icon path={ICONS.check} className="h-3.5 w-3.5" />
+      </span>
+      <span>{text}</span>
+    </li>
+  )
+}
+
+function SpecLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b py-1.5" style={{ borderColor: `${C.lavBorder}80` }}>
+      <dt className="font-medium" style={{ color: C.ink }}>
+        {label}
+      </dt>
+      <dd className="text-right">{value}</dd>
+    </div>
+  )
+}
+
+function CareCard({
+  n,
+  icon,
+  title,
+  text,
+}: {
+  n: string
+  icon: string
+  title: string
+  text: string
+}) {
+  return (
+    <div className="rounded-3xl border bg-white p-7" style={{ borderColor: C.lavBorder }}>
+      <div className="flex items-center gap-3">
+        <span
+          className="flex h-11 w-11 items-center justify-center rounded-2xl"
+          style={{ backgroundColor: C.lavBg, color: C.lavText }}
+        >
+          <Icon path={icon} className="h-5 w-5" />
+        </span>
+        <span className="text-sm font-bold" style={{ color: `${C.muted}80` }}>
+          0{n}
+        </span>
+      </div>
+      <h3 className="mt-5 text-lg font-bold">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>
+        {text}
+      </p>
+    </div>
+  )
+}
 
 function IconFeature({ icon, label }: { icon: string; label: string }) {
   return (
@@ -803,6 +1339,17 @@ function IconFeature({ icon, label }: { icon: string; label: string }) {
         <Icon path={icon} className="h-5 w-5" />
       </span>
       <span className="text-[11px] leading-tight" style={{ color: C.muted }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function MiniTrust({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <Icon path={icon} className="h-6 w-6" style={{ color: C.lavText }} />
+      <span className="text-xs font-medium" style={{ color: C.muted }}>
         {label}
       </span>
     </div>
@@ -829,7 +1376,7 @@ function FormatCard({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className="relative rounded-2xl border p-4 text-left transition-all"
+      className="relative rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5"
       style={{
         borderColor: active ? C.ink : C.lavBorder,
         backgroundColor: active ? C.lavBg : "#fff",
@@ -918,12 +1465,28 @@ function TrustInline({ icon, label }: { icon: string; label: string }) {
   )
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({
+  value,
+  numeric,
+  suffix,
+  label,
+}: {
+  value?: string
+  numeric?: number
+  suffix?: string
+  label: string
+}) {
   return (
-    <div>
-      <div className="text-4xl font-bold sm:text-5xl">{value}</div>
+    <Reveal>
+      <div className="text-4xl font-bold sm:text-5xl">
+        {typeof numeric === "number" ? (
+          <CountUp to={numeric} suffix={suffix} />
+        ) : (
+          value
+        )}
+      </div>
       <div className="mt-1 text-sm text-white/60">{label}</div>
-    </div>
+    </Reveal>
   )
 }
 
@@ -969,12 +1532,12 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="group rounded-3xl border bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      className="group h-full rounded-3xl border bg-white p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
       style={{ borderColor: C.lavBorder }}
     >
       <div className="flex items-center justify-between">
         <span
-          className="flex h-11 w-11 items-center justify-center rounded-2xl"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl transition-transform group-hover:scale-110"
           style={{ backgroundColor: C.lavBg, color: C.lavText }}
         >
           <Icon path={icon} className="h-5 w-5" />
@@ -1034,10 +1597,7 @@ function Spec({
 
 function StepCard({ n, title, text }: { n: string; title: string; text: string }) {
   return (
-    <div
-      className="rounded-3xl border bg-white p-7"
-      style={{ borderColor: C.lavBorder }}
-    >
+    <div className="h-full rounded-3xl border bg-white p-7" style={{ borderColor: C.lavBorder }}>
       <div
         className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
         style={{ backgroundColor: C.ink }}
@@ -1064,7 +1624,7 @@ function Review({
   text: string
 }) {
   return (
-    <div className="rounded-3xl border bg-white p-6" style={{ borderColor: C.lavBorder }}>
+    <div className="h-full rounded-3xl border bg-white p-6" style={{ borderColor: C.lavBorder }}>
       <div className="flex items-center gap-3">
         <span
           className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm font-bold text-white"
@@ -1102,37 +1662,5 @@ function Included({ text }: { text: string }) {
       </span>
       {text}
     </li>
-  )
-}
-
-function Faq({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="py-5">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-4 text-left"
-        aria-expanded={open}
-      >
-        <span className="text-base font-semibold">{q}</span>
-        <span
-          className={`flex h-7 w-7 flex-none items-center justify-center rounded-full border transition-transform ${
-            open ? "rotate-45" : ""
-          }`}
-          style={{ borderColor: C.lavBorder }}
-        >
-          <Icon path={ICONS.plus} className="h-4 w-4" />
-        </span>
-      </button>
-      <div
-        className={`grid transition-all duration-300 ${
-          open ? "mt-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        }`}
-      >
-        <p className="overflow-hidden text-sm leading-relaxed" style={{ color: C.muted }}>
-          {a}
-        </p>
-      </div>
-    </div>
   )
 }
