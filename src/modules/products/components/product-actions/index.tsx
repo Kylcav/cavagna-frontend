@@ -238,6 +238,27 @@ export default function ProductActions({
             ? "Victime de son succès"
             : "Ajouter au panier"}
         </Button>
+
+        {/* Réassurance conversion : reprend les promesses de l'onglet
+            "Livraison & Retours", remontées au moment de la décision d'achat. */}
+        <div className="mt-2 grid grid-cols-2 gap-y-2 gap-x-3 text-xs text-ui-fg-subtle">
+          <div className="flex items-center gap-x-1.5">
+            <span aria-hidden>🔒</span>
+            <span>Paiement 100% sécurisé</span>
+          </div>
+          <div className="flex items-center gap-x-1.5">
+            <span aria-hidden>🚚</span>
+            <span>Livraison 3-5 jours</span>
+          </div>
+          <div className="flex items-center gap-x-1.5">
+            <span aria-hidden>↩️</span>
+            <span>Satisfait ou remboursé</span>
+          </div>
+          <div className="flex items-center gap-x-1.5">
+            <span aria-hidden>🛡️</span>
+            <span>Protection anti-RFID</span>
+          </div>
+        </div>
       </div>
 
       {!inView && (
