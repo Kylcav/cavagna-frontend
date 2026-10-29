@@ -34,7 +34,7 @@ export default function ConditionsGeneralesPage({
     {
       number: "06.",
       title: "Livraison",
-      text: "Les commandes sont préparées avec soin et livrées à l’adresse indiquée par le client lors du passage de commande. Les délais de livraison sont donnés à titre indicatif. En raison du caractère premium et artisanal de certains produits, des délais spécifiques peuvent s’appliquer selon les modèles ou les disponibilités.",
+      text: "Les commandes sont préparées avec soin et livrées à l’adresse indiquée par le client lors du passage de commande. Les délais de livraison sont donnés à titre indicatif. En période de forte affluence, le délai annoncé peut varier de plus ou moins 3 jours. Des délais spécifiques peuvent également s’appliquer selon les modèles, les coloris ou les disponibilités.",
     },
     {
       number: "07.",
