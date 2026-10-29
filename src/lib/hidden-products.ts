@@ -1,10 +1,10 @@
 /**
- * Produits "tunnel de vente" (monoproduit) accessibles uniquement via leur
- * page dédiée (/aspirateur, /soie) et volontairement MASQUÉS de la boutique
- * ("Tous nos produits"). Ils restent publiés et dans le sales channel pour que
- * leur page tunnel puisse les charger — on les filtre juste de la liste.
+ * Produits volontairement MASQUÉS de la boutique ("Tous nos produits" et
+ * catégories). Leur page tunnel dédiée (/aspirateur, /soie…) les charge par
+ * handle, donc ils restent accessibles même en étant filtrés ici.
+ *
+ * Depuis le pivot "boutique cadeaux", l'aspirateur et la taie soie SONT des
+ * produits gagnants du catalogue (rangés en catégories) → ils ne sont plus
+ * masqués. Leurs pages tunnel restent dispo comme landing pages de campagne.
  */
-export const HIDDEN_PRODUCT_HANDLES = [
-  "aspirateur-robot-18000-pa",
-  "taie-soie-mulberry",
-]
+export const HIDDEN_PRODUCT_HANDLES: string[] = []
