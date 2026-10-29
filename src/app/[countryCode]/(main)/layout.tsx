@@ -8,7 +8,6 @@ import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
-import SavoirFaireReveal from "@modules/layout/components/savoir-faire-reveal"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -43,8 +42,6 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       {props.children}
 
       <Footer />
-
-<SavoirFaireReveal />
     </>
   )
 }
