@@ -15,22 +15,29 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
   const searchParams = useSearchParams()
   const variantId = searchParams.get("v_id")
 
-  const image = useMemo(() => {
-    const selectedVariant = product?.variants?.find(
-      (variant) => variant.id === variantId
-    )
+  // Photos par couleur, renseignées côté back (product.metadata.colorImages).
+  // Permet à l'image de suivre la couleur sélectionnée. N'expose aucun id CJ.
+  const colorImages = (product?.metadata as any)?.colorImages as
+    | Record<string, string[]>
+    | undefined
 
-    const variantImages = (selectedVariant as any)?.images || []
+  const urls = useMemo(() => {
+    if (colorImages && product?.variants?.length) {
+      const selected =
+        product.variants.find((v) => v.id === variantId) || product.variants[0]
+      // Valeur d'option de la variante qui correspond à une couleur connue.
+      const colorVal = (selected?.options || [])
+        .map((o: any) => o?.value)
+        .find((val: string) => val && colorImages[val])
+      const imgs = colorVal ? colorImages[colorVal] : undefined
+      if (imgs && imgs.length) return imgs
+    }
+    // Repli : images produit classiques.
+    return (images || []).map((i) => i.url).filter(Boolean)
+  }, [colorImages, product?.variants, variantId, images])
 
-    const variantImage = variantImages
-      .slice()
-      .sort((a: any, b: any) => (b.rank ?? 0) - (a.rank ?? 0))[0]
-
-    return variantImage || images?.[0]
-  }, [product?.variants, variantId, images])
-
-  const firstImage = images?.[0]?.url || image?.url
-  const secondImage = images?.[1]?.url
+  const firstImage = urls[0]
+  const secondImage = urls[1]
 
   if (!firstImage) {
     return null
@@ -42,7 +49,7 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
         <Container
           key={firstImage}
           className="group relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
-          id={image?.id ?? firstImage}
+          id={firstImage}
         >
           <Image
             src={firstImage}
