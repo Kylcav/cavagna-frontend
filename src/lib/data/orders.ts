@@ -61,6 +61,39 @@ export const listOrders = async (
     .catch((err) => medusaError(err))
 }
 
+// Recherche de commande pour un invité : numéro (display_id) + e-mail.
+// Appelle la route custom backend /store/order-lookup (pas d'auth client).
+export const lookupOrder = async (
+  _prev: unknown,
+  formData: FormData
+): Promise<{ order: any | null; error: string | null }> => {
+  const display_id = (formData.get("display_id") as string)?.trim()
+  const email = (formData.get("email") as string)?.trim()
+
+  if (!display_id || !email) {
+    return { order: null, error: "Merci d'indiquer votre numéro de commande et votre e-mail." }
+  }
+
+  try {
+    const data = await sdk.client.fetch<{ order: any }>(`/store/order-lookup`, {
+      method: "POST",
+      body: { display_id, email },
+      cache: "no-store",
+    })
+    return { order: data.order, error: null }
+  } catch (err: any) {
+    const status = err?.status
+    if (status === 404) {
+      return {
+        order: null,
+        error:
+          "Aucune commande ne correspond à ce numéro et cet e-mail. Vérifiez les informations de votre e-mail de confirmation.",
+      }
+    }
+    return { order: null, error: "Une erreur est survenue. Réessayez dans un instant." }
+  }
+}
+
 export const createTransferRequest = async (
   state: {
     success: boolean

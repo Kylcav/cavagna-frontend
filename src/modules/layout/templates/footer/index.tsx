@@ -40,6 +40,33 @@ export default async function Footer() {
               <li>Support client 7j/7</li>
               <li>Garantie satisfaction</li>
             </ul>
+
+            <ul className="mt-8 flex flex-col gap-4 text-[16px] leading-7">
+              <li>
+                <LocalizedClientLink
+                  href="/suivi-commande"
+                  className="text-[#171412] underline underline-offset-4 hover:text-[#8a6f55]"
+                >
+                  Suivre ma commande
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  href="/conditions-generales"
+                  className="text-[#5f5a55] hover:text-[#171412]"
+                >
+                  Conditions générales
+                </LocalizedClientLink>
+              </li>
+              <li>
+                <LocalizedClientLink
+                  href="/politique-confidentialite"
+                  className="text-[#5f5a55] hover:text-[#171412]"
+                >
+                  Politique de confidentialité
+                </LocalizedClientLink>
+              </li>
+            </ul>
           </div>
 
         </div>
