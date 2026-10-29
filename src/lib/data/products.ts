@@ -82,9 +82,10 @@ export const listProducts = async ({
         headers,
         next: {
           ...next,
-          revalidate: 60,
+          // Cacheable (au lieu de no-store) -> navigation catégories/produits
+          // quasi instantanée grâce au prefetch. Invalidé par les tags au besoin.
+          revalidate: 30,
         },
-        cache: "no-store",
       }
     )
     .then(({ products, count }) => {
