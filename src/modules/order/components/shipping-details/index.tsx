@@ -59,9 +59,9 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Méthode</Text>
           <Text className="txt-medium text-ui-fg-subtle break-words">
-            {(order as any).shipping_methods[0]?.name} (
+            {(order as any).shipping_methods?.[0]?.name || "Livraison gratuite"} (
             {convertToLocale({
-              amount: order.shipping_methods?.[0].total ?? 0,
+              amount: order.shipping_methods?.[0]?.total ?? 0,
               currency_code: order.currency_code,
             })}
             )
