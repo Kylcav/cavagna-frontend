@@ -25,9 +25,10 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     | Record<string, number>
     | undefined
 
-  const { urls, zoom } = useMemo(() => {
+  const { urls, zoom, usedColor } = useMemo(() => {
     let out: string[] | undefined
     let z = 1
+    let used = false
     if ((colorImages || imageZoom) && product?.variants?.length) {
       const selected =
         product.variants.find((v) => v.id === variantId) || product.variants[0]
@@ -38,17 +39,21 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
             v && ((colorImages && colorImages[v]) || (imageZoom && imageZoom[v]))
         )
       if (val) {
-        if (colorImages && colorImages[val]?.length) out = colorImages[val]
+        if (colorImages && colorImages[val]?.length) {
+          out = colorImages[val]
+          used = true
+        }
         if (imageZoom && imageZoom[val]) z = imageZoom[val]
       }
     }
     const urls = out || (images || []).map((i) => i.url).filter(Boolean)
-    return { urls, zoom: z }
+    return { urls, zoom: z, usedColor: used }
   }, [colorImages, imageZoom, product?.variants, variantId, images])
 
-  // Une seule image affichée sur la fiche produit (elle change avec la couleur,
-  // pas au survol). Le survol "2e couleur" ne concerne que la carte boutique.
+  // Produit à couleurs : une image qui suit la couleur (pas de survol).
+  // Produit simple (ex. aspirateur) : 1re image + 2e au survol.
   const firstImage = urls[0]
+  const secondImage = usedColor ? undefined : urls[1]
 
   if (!firstImage) {
     return null
@@ -59,13 +64,16 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
       <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
         <Container
           key={firstImage}
-          className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
+          className="group relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
           id={firstImage}
         >
           <Image
             src={firstImage}
             priority
-            className="absolute inset-0 rounded-rounded transition-transform duration-300 ease-out"
+            className={
+              "absolute inset-0 rounded-rounded transition-all duration-300 ease-out" +
+              (secondImage ? " group-hover:opacity-0" : "")
+            }
             alt="Product image"
             fill
             sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
@@ -75,6 +83,17 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
               transformOrigin: "center",
             }}
           />
+
+          {secondImage && (
+            <Image
+              src={secondImage}
+              className="absolute inset-0 rounded-rounded opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+              alt="Product image hover"
+              fill
+              sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+              style={{ objectFit: "cover" }}
+            />
+          )}
         </Container>
       </div>
     </div>
