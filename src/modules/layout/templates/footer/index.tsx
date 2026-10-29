@@ -44,7 +44,7 @@ export default async function Footer() {
             <ul className="mt-8 flex flex-col gap-4 text-[16px] leading-7">
               <li>
                 <LocalizedClientLink
-                  href="/suivi-commande"
+                  href="/account/orders"
                   className="text-[#171412] underline underline-offset-4 hover:text-[#8a6f55]"
                 >
                   Suivre ma commande
