@@ -13,12 +13,23 @@ type ItemProps = {
 }
 
 const Item = ({ item, currencyCode }: ItemProps) => {
+  // Image du coloris choisi (metadata.colorImages + option de la variante).
+  const colorImages = (item.product?.metadata as any)?.colorImages as
+    | Record<string, string[]>
+    | undefined
+  const optVal = (item.variant?.options || [])
+    .map((o: any) => o?.value)
+    .find((v: string) => v && colorImages?.[v])
+  const colorImg =
+    optVal && colorImages ? colorImages[optVal]?.[0] : undefined
+
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <div className="flex w-16">
           <Thumbnail
             thumbnail={
+              colorImg ||
               soieColorImage(item) ||
               item.variant?.images?.[0]?.url ||
               item.product?.images?.[0]?.url ||
