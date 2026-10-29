@@ -15,12 +15,14 @@ export const convertToLocale = ({
   maximumFractionDigits,
   locale = "en-US",
 }: ConvertToLocaleParams) => {
+  // Null-safe : un montant absent ne doit jamais faire planter le rendu.
+  const value = typeof amount === "number" && !Number.isNaN(amount) ? amount : 0
   return currency_code && !isEmpty(currency_code)
     ? new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currency_code,
         minimumFractionDigits,
         maximumFractionDigits,
-      }).format(amount)
-    : amount.toString()
+      }).format(value)
+    : value.toString()
 }
