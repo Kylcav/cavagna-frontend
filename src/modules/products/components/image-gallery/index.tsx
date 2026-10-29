@@ -87,6 +87,7 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
           <Image
             src={firstImage}
             priority
+            unoptimized
             className={
               "absolute inset-0 rounded-rounded transition-all duration-300 ease-out" +
               (secondImage ? " group-hover:opacity-0" : "")
@@ -104,6 +105,7 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
           {secondImage && (
             <Image
               src={secondImage}
+              unoptimized
               className="absolute inset-0 rounded-rounded opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
               alt="Product image hover"
               fill
