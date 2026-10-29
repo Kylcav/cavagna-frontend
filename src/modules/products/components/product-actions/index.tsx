@@ -1,6 +1,6 @@
 "use client"
 
-import { addToCart } from "@lib/data/cart"
+import { addToCart, getOrSetCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { fbq } from "@lib/meta-pixel"
 import { ttqTrack } from "@lib/tiktok-pixel"
@@ -43,11 +43,14 @@ export default function ProductActions({
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
-  // Précharge les pages panier + checkout en arrière-plan -> après "Ajouter au
-  // panier", l'atterrissage est instantané (pas de temps de chargement).
+  // Prépare tout en arrière-plan dès l'ouverture de la fiche :
+  //  - crée le panier à l'avance (le 1er ajout n'a plus à le créer)
+  //  - précharge /cart et /checkout (atterrissage instantané)
   useEffect(() => {
     if (!countryCode) return
+    getOrSetCart(countryCode).catch(() => {})
     router.prefetch(`/${countryCode}/cart`)
     router.prefetch(`/${countryCode}/checkout`)
   }, [countryCode, router])
@@ -127,22 +130,20 @@ export default function ProductActions({
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
 
+    // Feedback OPTIMISTE immédiat : le bouton confirme tout de suite,
+    // la mutation serveur se fait en arrière-plan (plus d'attente bloquante,
+    // plus de redirection vers /cart).
+    setJustAdded(true)
     setIsAdding(true)
 
+    const calculatedPrice = selectedVariant.calculated_price
+    const value = calculatedPrice?.calculated_amount
+    const currency =
+      calculatedPrice?.currency_code?.toUpperCase() ||
+      product.variants?.[0]?.calculated_price?.currency_code?.toUpperCase() ||
+      "CHF"
+
     try {
-      await addToCart({
-        variantId: selectedVariant.id,
-        quantity: 1,
-        countryCode,
-      })
-
-      const calculatedPrice = selectedVariant.calculated_price
-      const value = calculatedPrice?.calculated_amount
-      const currency =
-        calculatedPrice?.currency_code?.toUpperCase() ||
-        product.variants?.[0]?.calculated_price?.currency_code?.toUpperCase() ||
-        "CHF"
-
       fbq("AddToCart", {
         content_ids: [selectedVariant.id],
         content_name: product.title,
@@ -175,9 +176,19 @@ export default function ProductActions({
         currency,
       })
 
-      router.push(`/${countryCode}/cart`)
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+
+      // Met à jour le compteur panier dans le menu (sans recharger la page).
+      router.refresh()
+    } catch (e) {
+      setJustAdded(false)
     } finally {
       setIsAdding(false)
+      window.setTimeout(() => setJustAdded(false), 2500)
     }
   }
 
@@ -209,19 +220,16 @@ export default function ProductActions({
         <Button
           onClick={handleAddToCart}
           disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
+            !inStock || !selectedVariant || !!disabled || !isValidVariant
           }
           variant="primary"
           className="w-full h-14 rounded-full bg-[#171412] text-white text-base font-bold hover:bg-black"
-          isLoading={isAdding}
           data-testid="add-product-button"
         >
           {!selectedVariant
             ? "Choisir une option"
+            : justAdded
+            ? "Ajouté au panier ✓"
             : !inStock || !isValidVariant
             ? "Victime de son succès"
             : "Ajouter au panier"}
@@ -237,6 +245,7 @@ export default function ProductActions({
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
+          justAdded={justAdded}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
         />
