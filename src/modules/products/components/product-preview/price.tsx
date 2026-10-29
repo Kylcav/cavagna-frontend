@@ -1,4 +1,4 @@
-import { Text, clx } from "@medusajs/ui"
+import { Text } from "@medusajs/ui"
 import { VariantPrice } from "types/global"
 
 export default async function PreviewPrice({ price }: { price: VariantPrice }) {
@@ -6,24 +6,24 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
     return null
   }
 
+  const isSale = price.price_type === "sale"
+
   return (
-    <>
-      {price.price_type === "sale" && (
+    <div className="flex items-center gap-x-2">
+      {isSale && (
         <Text
-          className="line-through text-ui-fg-muted"
+          className="line-through text-ui-fg-subtle"
           data-testid="original-price"
         >
           {price.original_price}
         </Text>
       )}
       <Text
-        className={clx("text-ui-fg-muted", {
-          "text-ui-fg-interactive": price.price_type === "sale",
-        })}
+        className={isSale ? "text-ui-fg-base font-semibold" : "text-ui-fg-muted"}
         data-testid="price"
       >
         {price.calculated_price}
       </Text>
-    </>
+    </div>
   )
 }
