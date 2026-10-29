@@ -36,8 +36,9 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     return (images || []).map((i) => i.url).filter(Boolean)
   }, [colorImages, product?.variants, variantId, images])
 
+  // Une seule image affichée sur la fiche produit (elle change avec la couleur,
+  // pas au survol). Le survol "2e couleur" ne concerne que la carte boutique.
   const firstImage = urls[0]
-  const secondImage = urls[1]
 
   if (!firstImage) {
     return null
@@ -48,13 +49,13 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
       <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
         <Container
           key={firstImage}
-          className="group relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
+          className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
           id={firstImage}
         >
           <Image
             src={firstImage}
             priority
-            className="absolute inset-0 rounded-rounded transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+            className="absolute inset-0 rounded-rounded"
             alt="Product image"
             fill
             sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
@@ -62,19 +63,6 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
               objectFit: "cover",
             }}
           />
-
-          {secondImage && (
-            <Image
-              src={secondImage}
-              className="absolute inset-0 rounded-rounded transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-              alt="Product image hover"
-              fill
-              sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-              style={{
-                objectFit: "cover",
-              }}
-            />
-          )}
         </Container>
       </div>
     </div>
