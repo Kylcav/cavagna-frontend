@@ -25,7 +25,7 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     | Record<string, number>
     | undefined
 
-  const { urls, zoom, usedColor } = useMemo(() => {
+  const { urls, zoom } = useMemo(() => {
     let out: string[] | undefined
     let z = 1
     let used = false
@@ -67,10 +67,10 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     })
   }, [colorImages, images])
 
-  // Produit à couleurs : une image qui suit la couleur (pas de survol).
-  // Produit simple (ex. aspirateur) : 1re image + 2e au survol.
+  // 1re image = l'image de la couleur (ou la 1re image produit) ; 2e image au
+  // survol si elle existe (ex. porte-cartes : intérieur du coloris sélectionné).
   const firstImage = urls[0]
-  const secondImage = usedColor ? undefined : urls[1]
+  const secondImage = urls[1]
 
   if (!firstImage) {
     return null
