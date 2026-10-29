@@ -126,12 +126,30 @@ const Payment = ({
       return
     }
 
-    const savedPaymentMethod = sessionStorage.getItem("mizucat_payment_method")
+    const savedPaymentMethod = sessionStorage.getItem("cavagna_payment_method")
 
     if (!selectedPaymentMethod && savedPaymentMethod) {
       setSelectedPaymentMethod(savedPaymentMethod)
     }
   }, [selectedPaymentMethod])
+
+  // Auto-sélection du moyen de paiement Stripe dès l'arrivée sur l'étape :
+  // le Payment Element (Carte / Apple Pay / Google Pay / TWINT) s'affiche
+  // directement, sans avoir à cliquer d'abord sur "Carte bancaire".
+  useEffect(() => {
+    if (!isOpen || paidByGiftcard) return
+    if (selectedPaymentMethod) return
+    if (!availablePaymentMethods?.length) return
+
+    const preferred =
+      availablePaymentMethods.find((m) => isStripeLike(m.id)) ||
+      availablePaymentMethods[0]
+
+    if (preferred?.id) {
+      setPaymentMethod(preferred.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, paidByGiftcard, selectedPaymentMethod, availablePaymentMethods])
 
   useEffect(() => {
     setError(null)
