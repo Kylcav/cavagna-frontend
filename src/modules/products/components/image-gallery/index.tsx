@@ -20,21 +20,31 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
   const colorImages = (product?.metadata as any)?.colorImages as
     | Record<string, string[]>
     | undefined
+  // Zoom par option (ex. poêle qui "grandit" avec la taille).
+  const imageZoom = (product?.metadata as any)?.imageZoom as
+    | Record<string, number>
+    | undefined
 
-  const urls = useMemo(() => {
-    if (colorImages && product?.variants?.length) {
+  const { urls, zoom } = useMemo(() => {
+    let out: string[] | undefined
+    let z = 1
+    if ((colorImages || imageZoom) && product?.variants?.length) {
       const selected =
         product.variants.find((v) => v.id === variantId) || product.variants[0]
-      // Valeur d'option de la variante qui correspond à une couleur connue.
-      const colorVal = (selected?.options || [])
+      const val = (selected?.options || [])
         .map((o: any) => o?.value)
-        .find((val: string) => val && colorImages[val])
-      const imgs = colorVal ? colorImages[colorVal] : undefined
-      if (imgs && imgs.length) return imgs
+        .find(
+          (v: string) =>
+            v && ((colorImages && colorImages[v]) || (imageZoom && imageZoom[v]))
+        )
+      if (val) {
+        if (colorImages && colorImages[val]?.length) out = colorImages[val]
+        if (imageZoom && imageZoom[val]) z = imageZoom[val]
+      }
     }
-    // Repli : images produit classiques.
-    return (images || []).map((i) => i.url).filter(Boolean)
-  }, [colorImages, product?.variants, variantId, images])
+    const urls = out || (images || []).map((i) => i.url).filter(Boolean)
+    return { urls, zoom: z }
+  }, [colorImages, imageZoom, product?.variants, variantId, images])
 
   // Une seule image affichée sur la fiche produit (elle change avec la couleur,
   // pas au survol). Le survol "2e couleur" ne concerne que la carte boutique.
@@ -55,12 +65,14 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
           <Image
             src={firstImage}
             priority
-            className="absolute inset-0 rounded-rounded"
+            className="absolute inset-0 rounded-rounded transition-transform duration-300 ease-out"
             alt="Product image"
             fill
             sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
             style={{
               objectFit: "cover",
+              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+              transformOrigin: "center",
             }}
           />
         </Container>
