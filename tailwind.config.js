@@ -1,6 +1,11 @@
 const path = require("path")
 
 module.exports = {
+  // Le survol (hover:, group-hover:) ne s'applique que sur les appareils à
+  // souris -> sur mobile/tactile, 1 seul tap ouvre (fini le double-tap).
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   darkMode: "class",
   presets: [require("@medusajs/ui-preset")],
   content: [

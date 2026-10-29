@@ -73,8 +73,8 @@ const ImageOrPlaceholder = ({
         alt="Thumbnail"
         className={clx(
           "absolute inset-0 object-cover object-center transition-opacity duration-300 opacity-100",
-          // Ne s'efface au survol que s'il existe une 2e image (sinon la carte
-          // deviendrait blanche pour les produits à une seule photo).
+          // Survol géré globalement (hoverOnlyWhenSupported) -> pas de survol
+          // sur tactile, donc 1 seul tap ouvre la fiche.
           { "group-hover:opacity-0": !!secondImage }
         )}
         draggable={false}
