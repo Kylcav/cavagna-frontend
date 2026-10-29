@@ -44,6 +44,14 @@ export default function ProductActions({
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
 
+  // Précharge les pages panier + checkout en arrière-plan -> après "Ajouter au
+  // panier", l'atterrissage est instantané (pas de temps de chargement).
+  useEffect(() => {
+    if (!countryCode) return
+    router.prefetch(`/${countryCode}/cart`)
+    router.prefetch(`/${countryCode}/checkout`)
+  }, [countryCode, router])
+
   useEffect(() => {
     if (hasInitialized.current) return
     if (!product.variants?.length) return

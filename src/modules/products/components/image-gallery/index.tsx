@@ -4,7 +4,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
@@ -49,6 +49,23 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     const urls = out || (images || []).map((i) => i.url).filter(Boolean)
     return { urls, zoom: z, usedColor: used }
   }, [colorImages, imageZoom, product?.variants, variantId, images])
+
+  // Précharge TOUTES les images de couleurs en arrière-plan dès l'arrivée sur
+  // la fiche -> le changement de couleur est instantané (image déjà en cache).
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const all = new Set<string>()
+    if (colorImages) {
+      Object.values(colorImages).forEach((arr) =>
+        (arr || []).forEach((u) => u && all.add(u))
+      )
+    }
+    ;(images || []).forEach((i) => i.url && all.add(i.url))
+    all.forEach((u) => {
+      const img = new window.Image()
+      img.src = u
+    })
+  }, [colorImages, images])
 
   // Produit à couleurs : une image qui suit la couleur (pas de survol).
   // Produit simple (ex. aspirateur) : 1re image + 2e au survol.
