@@ -24,7 +24,7 @@ export default async function Footer() {
               <p>Les meilleures idées cadeaux,</p>
               <p>sélectionnées pour vous.</p>
               <p>Des produits malins et tendance,</p>
-              <p>livrés rapidement en Suisse et en Europe.</p>
+              <p>livrés rapidement partout en Europe.</p>
             </div>
           </div>
 
@@ -35,7 +35,7 @@ export default async function Footer() {
             </h3>
 
             <ul className="mt-10 flex flex-col gap-5 text-[18px] leading-8 text-[#5f5a55]">
-              <li>Livraison rapide Suisse</li>
+              <li>Livraison rapide</li>
               <li>Paiement sécurisé</li>
               <li>Support client 7j/7</li>
               <li>Garantie satisfaction</li>
