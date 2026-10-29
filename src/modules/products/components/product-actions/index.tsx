@@ -176,14 +176,23 @@ export default function ProductActions({
         currency,
       })
 
-      await addToCart({
+      // Ajout lancé en ARRIÈRE-PLAN (pas de await bloquant).
+      const addPromise = addToCart({
         variantId: selectedVariant.id,
         quantity: 1,
         countryCode,
       })
 
-      // Ouvre le panier (page préchargée + panier pré-créé -> rapide).
+      // Navigation IMMÉDIATE vers le panier (route préchargée + skeleton) :
+      // le clic est instantané, on n'attend pas la réponse serveur.
       router.push(`/${countryCode}/cart`)
+
+      // Quand l'ajout se termine, il a invalidé le cache panier ->
+      // on rafraîchit la page /cart pour que l'article apparaisse. Robuste :
+      // si l'ajout est déjà fini quand la page se rend, l'article est déjà là.
+      addPromise
+        .then(() => router.refresh())
+        .catch(() => setJustAdded(false))
     } catch (e) {
       setJustAdded(false)
     } finally {
