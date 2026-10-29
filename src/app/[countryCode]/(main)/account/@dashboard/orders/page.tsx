@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 import { listOrders } from "@lib/data/orders"
 import Divider from "@modules/common/components/divider"
 import TransferRequestForm from "@modules/account/components/transfer-request-form"
+import OrderLookup from "@modules/order/components/order-lookup"
 
 export const metadata: Metadata = {
   title: "Commandes",
@@ -28,6 +29,12 @@ export default async function Orders() {
       </div>
       <div>
         <OrderOverview orders={orders} />
+        <Divider className="my-16" />
+        <OrderLookup
+          title="Suivre une commande par numéro"
+          description="Vous avez un numéro de commande ? Entrez-le avec l'e-mail utilisé lors de l'achat pour en voir le statut et le suivi."
+          className="w-full"
+        />
         <Divider className="my-16" />
         <TransferRequestForm />
       </div>

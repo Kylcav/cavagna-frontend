@@ -32,7 +32,17 @@ const StatusBadge = ({ label }: { label: string }) => {
   )
 }
 
-export default function OrderLookup() {
+type OrderLookupProps = {
+  title?: string
+  description?: string
+  className?: string
+}
+
+export default function OrderLookup({
+  title = "Suivre ma commande",
+  description = "Entrez votre numéro de commande et l'e-mail utilisé lors de l'achat (ils figurent dans votre e-mail de confirmation).",
+  className = "mx-auto w-full max-w-2xl",
+}: OrderLookupProps) {
   const [state, formAction] = useActionState(lookupOrder, {
     order: null,
     error: null,
@@ -40,12 +50,9 @@ export default function OrderLookup() {
   const order = state?.order
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
-      <h1 className="mb-2 text-2xl font-semibold">Suivre ma commande</h1>
-      <p className="mb-6 text-ui-fg-subtle">
-        Entrez votre numéro de commande et l'e-mail utilisé lors de l'achat (ils
-        figurent dans votre e-mail de confirmation).
-      </p>
+    <div className={className}>
+      <h2 className="mb-2 text-2xl font-semibold">{title}</h2>
+      <p className="mb-6 text-ui-fg-subtle">{description}</p>
 
       <form action={formAction} className="mb-8 flex flex-col gap-3">
         <label className="flex flex-col gap-1">
