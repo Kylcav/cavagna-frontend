@@ -158,6 +158,17 @@ const shippingMethods = _shippingMethods || []
     setError(null)
   }, [isOpen])
 
+  // Pré-sélection auto : s'il n'y a qu'une seule option de livraison (ex.
+  // "Livraison gratuite") et qu'aucune n'est encore choisie, on la sélectionne
+  // tout de suite -> l'utilisateur n'a pas à cliquer.
+  useEffect(() => {
+    if (shippingMethodId || isLoading) return
+    if (shippingMethods.length === 1 && !hasPickupOptions) {
+      handleSetShippingMethod(shippingMethods[0].id, "shipping")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shippingMethods.length, shippingMethodId, hasPickupOptions])
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
