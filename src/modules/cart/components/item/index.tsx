@@ -25,12 +25,26 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Vignette : coloris soie choisi en priorité, sinon image produit/variante.
+  // Vignette : image du coloris choisi (colorImages) en priorité, puis soie,
+  // puis image variante/produit. -> le panier montre la bonne couleur.
+  const colorImages = (item.product?.metadata as any)?.colorImages as
+    | Record<string, string[]>
+    | undefined
+  const selectedOptionVal = (item.variant?.options || [])
+    .map((o: any) => o?.value)
+    .find((v: string) => v && colorImages?.[v])
+  const colorImg =
+    selectedOptionVal && colorImages
+      ? colorImages[selectedOptionVal]?.[0]
+      : undefined
+
   const soieImg = soieColorImage(item)
-  const thumb = soieImg || item.variant?.images?.[0]?.url || item.thumbnail
-  const thumbImages = soieImg
-    ? undefined
-    : item.variant?.images || item.variant?.product?.images
+  const thumb =
+    colorImg || soieImg || item.variant?.images?.[0]?.url || item.thumbnail
+  const thumbImages =
+    colorImg || soieImg
+      ? undefined
+      : item.variant?.images || item.variant?.product?.images
 
   const changeQuantity = async (quantity: number) => {
     setError(null)

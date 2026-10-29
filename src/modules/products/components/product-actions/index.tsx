@@ -182,8 +182,8 @@ export default function ProductActions({
         countryCode,
       })
 
-      // Met à jour le compteur panier dans le menu (sans recharger la page).
-      router.refresh()
+      // Ouvre le panier (page préchargée + panier pré-créé -> rapide).
+      router.push(`/${countryCode}/cart`)
     } catch (e) {
       setJustAdded(false)
     } finally {
