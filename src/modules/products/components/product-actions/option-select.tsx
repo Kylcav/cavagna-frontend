@@ -23,22 +23,30 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 
   return (
     <div className="flex flex-col gap-y-3">
-      <span className="text-sm">Select {title}</span>
-      <div
-        className="flex flex-wrap justify-between gap-2"
-        data-testid={dataTestId}
-      >
+      <div className="flex items-baseline gap-x-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8a6f55]">
+          {title}
+        </span>
+        {current && (
+          <span className="text-sm font-medium text-[#171412]">{current}</span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2" data-testid={dataTestId}>
         {filteredOptions.map((v) => {
+          const isSelected = v === current
           return (
             <button
               onClick={() => updateOption(option.id, v)}
               key={v}
               className={clx(
-                "border-ui-border-base bg-ui-bg-subtle border text-small-regular h-10 rounded-rounded p-2 flex-1 ",
+                "whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150 ease-out",
                 {
-                  "border-ui-border-interactive": v === current,
-                  "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
-                    v !== current,
+                  "border-[#171412] bg-[#171412] text-white shadow-sm":
+                    isSelected,
+                  "border-black/15 bg-white text-[#2b2b24] hover:border-[#171412]/50 hover:-translate-y-0.5":
+                    !isSelected,
+                  "cursor-not-allowed opacity-40": disabled,
                 }
               )}
               disabled={disabled}
