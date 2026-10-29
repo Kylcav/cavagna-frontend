@@ -19,7 +19,7 @@ export default async function PreviewPrice({ price }: { price: VariantPrice }) {
         </Text>
       )}
       <Text
-        className={isSale ? "text-ui-fg-base font-semibold" : "text-ui-fg-muted"}
+        className="text-ui-fg-base font-semibold"
         data-testid="price"
       >
         {price.calculated_price}
