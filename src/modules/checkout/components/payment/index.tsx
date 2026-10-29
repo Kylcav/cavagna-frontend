@@ -133,11 +133,13 @@ const Payment = ({
     }
   }, [selectedPaymentMethod])
 
-  // Auto-sélection du moyen de paiement Stripe dès l'arrivée sur l'étape :
-  // le Payment Element (Carte / Apple Pay / Google Pay / TWINT) s'affiche
-  // directement, sans avoir à cliquer d'abord sur "Carte bancaire".
+  // Auto-sélection du moyen de paiement Stripe dès le MONTAGE du checkout
+  // (sans attendre l'étape paiement) : le Payment Element (Carte / Apple Pay /
+  // Google Pay / TWINT) se précharge en arrière-plan et s'affiche directement,
+  // sans avoir à cliquer d'abord sur "Carte bancaire". Secours si la session
+  // n'a pas déjà été créée côté serveur au chargement de la page.
   useEffect(() => {
-    if (!isOpen || paidByGiftcard) return
+    if (paidByGiftcard) return
     if (selectedPaymentMethod) return
     if (!availablePaymentMethods?.length) return
 
@@ -149,7 +151,7 @@ const Payment = ({
       setPaymentMethod(preferred.id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, paidByGiftcard, selectedPaymentMethod, availablePaymentMethods])
+  }, [paidByGiftcard, selectedPaymentMethod, availablePaymentMethods])
 
   useEffect(() => {
     setError(null)

@@ -21,6 +21,13 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="fr" data-mode="light">
       <head>
+        {/* Préconnexion aux serveurs Stripe : la poignée de main réseau est
+            faite à l'avance, le Payment Element se charge plus vite. */}
+        <link rel="preconnect" href="https://js.stripe.com" crossOrigin="" />
+        <link rel="preconnect" href="https://api.stripe.com" crossOrigin="" />
+        <link rel="preconnect" href="https://m.stripe.network" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+
         <Script id="meta-pixel" strategy="beforeInteractive">
           {`
             !function(f,b,e,v,n,t,s)
