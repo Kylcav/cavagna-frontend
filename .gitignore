@@ -62,3 +62,8 @@ dist/
 build/
 .env
 .env.*
+
+# Fichiers generes par next-sitemap (postbuild) - ne pas tracker
+public/robots.txt
+public/sitemap.xml
+public/sitemap-0.xml
