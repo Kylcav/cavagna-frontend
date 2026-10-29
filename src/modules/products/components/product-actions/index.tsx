@@ -248,7 +248,7 @@ export default function ProductActions({
           </div>
           <div className="flex items-center gap-x-1.5">
             <span aria-hidden>🚚</span>
-            <span>Livraison 3-5 jours</span>
+            <span>Livraison 5-8 jours</span>
           </div>
           <div className="flex items-center gap-x-1.5">
             <span aria-hidden>↩️</span>
