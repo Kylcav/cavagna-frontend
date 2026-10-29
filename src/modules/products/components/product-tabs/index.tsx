@@ -41,27 +41,49 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
+type Spec = { label: string; value: string }
+
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
+  // Caractéristiques renseignées depuis CJ (metadata.specs). On n'affiche
+  // QUE les champs disponibles — rien d'inventé, pas de "-".
+  const metaSpecs = (product.metadata?.specs as Spec[] | undefined) || []
+
+  const specs: Spec[] = metaSpecs.length
+    ? metaSpecs.filter((s) => s && s.label && s.value)
+    : [
+        ...(product.weight
+          ? [{ label: "Poids", value: `${product.weight / 1000} kg` }]
+          : []),
+        ...(product.length && product.width && product.height
+          ? [
+              {
+                label: "Dimensions",
+                value: `${product.length} × ${product.width} × ${product.height} cm`,
+              },
+            ]
+          : []),
+        ...(product.material
+          ? [{ label: "Matière", value: product.material }]
+          : []),
+      ]
+
+  if (!specs.length) {
+    return (
+      <div className="text-small-regular py-8 text-ui-fg-subtle">
+        Plus d’informations sur ce produit bientôt disponibles.
+      </div>
+    )
+  }
+
   return (
     <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Poids</span>
-            <p>{product.weight ? `${product.weight / 1000} kg` : "-"}</p>
+      <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-8">
+        {specs.map((s, i) => (
+          <div key={i}>
+            <span className="font-semibold">{s.label}</span>
+            <p className="text-ui-fg-subtle">{s.value}</p>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}l x ${product.height}H`
-                : "-"}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )
