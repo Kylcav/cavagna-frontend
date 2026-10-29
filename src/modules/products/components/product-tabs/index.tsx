@@ -98,7 +98,7 @@ const ShippingInfoTab = () => {
           <div>
             <span className="font-semibold">Livraison rapide</span>
             <p className="max-w-sm">
-              Votre colis arrivera sous 5 à 8 jours ouvrés, en point de retrait
+              Votre colis arrivera sous 3 à 5 jours ouvrés, en point de retrait
               ou directement chez vous.
             </p>
           </div>
