@@ -1,15 +1,18 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
-import { Container } from "@medusajs/ui"
+import { clx, Container } from "@medusajs/ui"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
   product: HttpTypes.StoreProduct
 }
+
+const IMG_SIZES =
+  "(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
 
 const ImageGallery = ({ images, product }: ImageGalleryProps) => {
   const searchParams = useSearchParams()
@@ -28,7 +31,6 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
   const { urls, zoom } = useMemo(() => {
     let out: string[] | undefined
     let z = 1
-    let used = false
     if ((colorImages || imageZoom) && product?.variants?.length) {
       const selected =
         product.variants.find((v) => v.id === variantId) || product.variants[0]
@@ -41,13 +43,12 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
       if (val) {
         if (colorImages && colorImages[val]?.length) {
           out = colorImages[val]
-          used = true
         }
         if (imageZoom && imageZoom[val]) z = imageZoom[val]
       }
     }
     const urls = out || (images || []).map((i) => i.url).filter(Boolean)
-    return { urls, zoom: z, usedColor: used }
+    return { urls, zoom: z }
   }, [colorImages, imageZoom, product?.variants, variantId, images])
 
   // Précharge TOUTES les images de couleurs en arrière-plan dès l'arrivée sur
@@ -67,39 +68,56 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
     })
   }, [colorImages, images])
 
-  // 1re image = l'image de la couleur (ou la 1re image produit) ; 2e image au
-  // survol si elle existe (ex. porte-cartes : intérieur du coloris sélectionné).
   const firstImage = urls[0]
   const secondImage = urls[1]
+
+  // Carousel mobile : point actif + reset au changement de couleur.
+  const [active, setActive] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    setActive(0)
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0
+  }, [firstImage])
+  const onScroll = () => {
+    const el = scrollRef.current
+    if (!el || !el.clientWidth) return
+    setActive(Math.round(el.scrollLeft / el.clientWidth))
+  }
 
   if (!firstImage) {
     return null
   }
 
+  const imgTransform =
+    zoom !== 1
+      ? { transform: `scale(${zoom})`, transformOrigin: "center" as const }
+      : undefined
+
   return (
     <div className="flex items-start relative">
       <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
+        {/* Desktop (appareil avec survol) : image + 2e image au survol.
+            Sur tactile avec 2 images, on masque ce bloc (carousel à la place). */}
         <Container
           key={firstImage}
-          className="group relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
+          className={clx(
+            "group relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle",
+            secondImage && "[@media(hover:none)]:hidden"
+          )}
           id={firstImage}
         >
           <Image
             src={firstImage}
             priority
             unoptimized
-            className={
-              "absolute inset-0 rounded-rounded transition-all duration-300 ease-out" +
-              (secondImage ? " group-hover:opacity-0" : "")
-            }
+            className={clx(
+              "absolute inset-0 rounded-rounded transition-all duration-300 ease-out",
+              secondImage && "group-hover:opacity-0"
+            )}
             alt="Product image"
             fill
-            sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-            style={{
-              objectFit: "cover",
-              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-              transformOrigin: "center",
-            }}
+            sizes={IMG_SIZES}
+            style={{ objectFit: "cover", ...imgTransform }}
           />
 
           {secondImage && (
@@ -109,30 +127,51 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
               className="absolute inset-0 rounded-rounded opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
               alt="Product image hover"
               fill
-              sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+              sizes={IMG_SIZES}
               style={{ objectFit: "cover" }}
             />
           )}
         </Container>
 
-        {/* Mobile / tactile (pas de survol) : on empile la 2e image (intérieur)
-            sous la principale pour qu'elle reste visible. Masquée sur desktop,
-            où le survol s'en charge. */}
+        {/* Mobile / tactile (pas de survol) : CAROUSEL swipe des images du
+            coloris sélectionné, avec points indicateurs. */}
         {secondImage && (
-          <Container
-            className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle hidden [@media(hover:none)]:block"
-            id={`${firstImage}-2`}
-          >
-            <Image
-              src={secondImage}
-              unoptimized
-              className="absolute inset-0 rounded-rounded"
-              alt="Product image inside"
-              fill
-              sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-              style={{ objectFit: "cover" }}
-            />
-          </Container>
+          <div className="hidden [@media(hover:none)]:block">
+            <div
+              ref={scrollRef}
+              onScroll={onScroll}
+              className="flex w-full snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {urls.map((u, i) => (
+                <div
+                  key={`${firstImage}-${i}`}
+                  className="relative shrink-0 w-full snap-center aspect-[29/34] overflow-hidden rounded-rounded bg-ui-bg-subtle"
+                >
+                  <Image
+                    src={u}
+                    unoptimized
+                    className="absolute inset-0"
+                    alt="Product image"
+                    fill
+                    sizes={IMG_SIZES}
+                    style={{ objectFit: "cover", ...imgTransform }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 flex justify-center gap-2">
+              {urls.map((_, i) => (
+                <span
+                  key={i}
+                  className={clx(
+                    "h-2 w-2 rounded-full transition-colors",
+                    i === active ? "bg-[#171412]" : "bg-gray-300"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>
