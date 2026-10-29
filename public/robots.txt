@@ -1,0 +1,12 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /account
+Disallow: /cart
+
+# Host
+Host: https://cavagna.shop
+
+# Sitemaps
+Sitemap: https://cavagna.shop/sitemap.xml
