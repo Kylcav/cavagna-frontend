@@ -71,7 +71,12 @@ const ImageOrPlaceholder = ({
       <Image
         src={firstImage}
         alt="Thumbnail"
-        className="absolute inset-0 object-cover object-center transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+        className={clx(
+          "absolute inset-0 object-cover object-center transition-opacity duration-300 opacity-100",
+          // Ne s'efface au survol que s'il existe une 2e image (sinon la carte
+          // deviendrait blanche pour les produits à une seule photo).
+          { "group-hover:opacity-0": !!secondImage }
+        )}
         draggable={false}
         quality={50}
         sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
