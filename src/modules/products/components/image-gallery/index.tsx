@@ -114,6 +114,26 @@ const ImageGallery = ({ images, product }: ImageGalleryProps) => {
             />
           )}
         </Container>
+
+        {/* Mobile / tactile (pas de survol) : on empile la 2e image (intérieur)
+            sous la principale pour qu'elle reste visible. Masquée sur desktop,
+            où le survol s'en charge. */}
+        {secondImage && (
+          <Container
+            className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle hidden [@media(hover:none)]:block"
+            id={`${firstImage}-2`}
+          >
+            <Image
+              src={secondImage}
+              unoptimized
+              className="absolute inset-0 rounded-rounded"
+              alt="Product image inside"
+              fill
+              sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+              style={{ objectFit: "cover" }}
+            />
+          </Container>
+        )}
       </div>
     </div>
   )

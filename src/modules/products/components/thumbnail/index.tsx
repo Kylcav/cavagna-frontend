@@ -78,7 +78,7 @@ const ImageOrPlaceholder = ({
           { "group-hover:opacity-0": !!secondImage }
         )}
         draggable={false}
-        quality={50}
+        unoptimized
         sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
         fill
       />
@@ -89,7 +89,7 @@ const ImageOrPlaceholder = ({
           alt="Thumbnail hover"
           className="absolute inset-0 object-cover object-center transition-opacity duration-300 opacity-0 group-hover:opacity-100"
           draggable={false}
-          quality={50}
+          unoptimized
           sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
           fill
         />
