@@ -21,8 +21,23 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="fr" data-mode="light">
       <head>
-        {/* Préconnexion aux serveurs Stripe : la poignée de main réseau est
-            faite à l'avance, le Payment Element se charge plus vite. */}
+        {/* Préconnexions : la poignée de main réseau (DNS + TLS) est faite à
+            l'avance pour les domaines tiers critiques, ce qui accélère le
+            chargement de la page et surtout le déclenchement du pixel Meta
+            (→ la "vue de page" est comptée pour plus de visiteurs venus des pubs). */}
+        <link
+          rel="preconnect"
+          href="https://connect.facebook.net"
+          crossOrigin=""
+        />
+        <link
+          rel="preconnect"
+          href="https://analytics.tiktok.com"
+          crossOrigin=""
+        />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
+
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="" />
         <link rel="preconnect" href="https://api.stripe.com" crossOrigin="" />
         <link rel="preconnect" href="https://m.stripe.network" crossOrigin="" />
