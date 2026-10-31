@@ -21,9 +21,9 @@ export default async function Footer() {
             </LocalizedClientLink>
 
             <div className="mt-10 flex flex-col gap-5 text-[18px] leading-8 text-[#5f5a55]">
-              <p>Les meilleures idées cadeaux,</p>
-              <p>sélectionnées pour vous.</p>
-              <p>Des produits malins et tendance,</p>
+              <p>Le spécialiste du porte-cartes</p>
+              <p>et du portefeuille.</p>
+              <p>Anti-RFID, ultra-fins, premium,</p>
               <p>livrés rapidement partout en Europe.</p>
             </div>
           </div>
