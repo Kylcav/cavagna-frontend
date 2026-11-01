@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
 import StarRating from "../star-rating"
+import Reveal from "@modules/common/components/reveal"
 import { getReviews, reviewStats } from "@lib/reviews"
 
 type Props = {
@@ -102,41 +103,48 @@ const ProductStory = ({ product, images }: Props) => {
   return (
     <div className="w-full">
       {/* VIDÉO EN ACTION — pleine largeur */}
-      <VideoBlock src="/produit-pub.mp4" />
+      <Reveal>
+        <VideoBlock src="/produit-pub.mp4" />
+      </Reveal>
 
       {/* CHIFFRES CLÉS */}
       <section className="content-container py-10 small:py-14">
         <div className="grid grid-cols-3 gap-4">
           {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="text-3xl small:text-5xl font-bold text-ui-fg-base">
-                {s.big}
+            <Reveal key={i} delay={i * 120}>
+              <div className="text-center">
+                <div className="text-3xl small:text-5xl font-bold text-ui-fg-base">
+                  {s.big}
+                </div>
+                <div className="mt-2 text-xs small:text-sm font-semibold uppercase tracking-wide text-ui-fg-subtle">
+                  {s.label}
+                </div>
               </div>
-              <div className="mt-2 text-xs small:text-sm font-semibold uppercase tracking-wide text-ui-fg-subtle">
-                {s.label}
-              </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* BÉNÉFICES — split pleine largeur façon PunCube */}
       {BENEFITS.map((b, i) => (
-        <BenefitSplit
-          key={i}
-          img={pick(i + 1)}
-          title={b.title}
-          text={b.text}
-          reverse={i % 2 === 1}
-        />
+        <Reveal key={i}>
+          <BenefitSplit
+            img={pick(i + 1)}
+            title={b.title}
+            text={b.text}
+            reverse={i % 2 === 1}
+          />
+        </Reveal>
       ))}
 
       {/* VIDÉO CINÉMATIQUE — pleine largeur */}
-      <VideoBlock src="/produit-cinematic.mp4" />
+      <Reveal>
+        <VideoBlock src="/produit-cinematic.mp4" />
+      </Reveal>
 
       {/* AVIS */}
       <section id="avis" className="border-t border-ui-border-base bg-ui-bg-subtle">
-        <div className="content-container py-12 small:py-16">
+        <Reveal className="content-container py-12 small:py-16">
           <h2 className="text-center text-3xl font-extrabold uppercase text-ui-fg-base">
             Avis clients
           </h2>
@@ -213,7 +221,7 @@ const ProductStory = ({ product, images }: Props) => {
               </div>
             </>
           )}
-        </div>
+        </Reveal>
       </section>
     </div>
   )
