@@ -11,22 +11,18 @@ type Props = {
 /** Bénéfices génériques porte-cartes/portefeuille (caractéristiques réelles). */
 const BENEFITS = [
   {
-    eyebrow: "ULTRA-FIN",
     title: "Fini le portefeuille qui déforme ta poche",
-    text: "Format pensé pour la poche : tu oublies que tu l'as sur toi. Fini la bosse disgracieuse à l'arrière du jean, place à une silhouette nette.",
+    text: "Format pensé pour la poche : tu oublies que tu l'as sur toi. Fini la bosse à l'arrière du jean, place à une silhouette nette et discrète.",
   },
   {
-    eyebrow: "ANTI-RFID",
-    title: "Tes cartes protégées du piratage sans contact",
-    text: "La technologie anti-RFID bloque la lecture à distance de tes cartes bancaires. Personne ne peut les scanner à ton insu dans les transports ou la file d'attente.",
+    title: "Tes cartes protégées du piratage",
+    text: "La technologie anti-RFID bloque la lecture sans contact de tes cartes. Personne ne peut les scanner à ton insu dans les transports ou la file d'attente.",
   },
   {
-    eyebrow: "CAPACITÉ",
     title: "Tout ce qu'il te faut, rien de plus",
     text: "Tes cartes à portée de main, accès instantané d'un seul geste. L'essentiel du quotidien, sans l'encombrement d'un portefeuille classique.",
   },
   {
-    eyebrow: "PREMIUM",
     title: "Des matériaux qui en imposent",
     text: "Aluminium et fibre de carbone : léger, robuste, élégant. L'accessoire qu'on remarque — discrètement — au moment où tu payes.",
   },
@@ -39,18 +35,57 @@ const STATS = [
   { big: "30 j", label: "Satisfait ou remboursé" },
 ]
 
+/** Vidéo pleine largeur, bord à bord. */
 const VideoBlock = ({ src }: { src: string }) => (
-  <section className="w-full bg-black">
-    <video
-      src={src}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className="mx-auto block aspect-video w-full max-w-5xl object-cover"
-    />
-  </section>
+  <video
+    src={src}
+    autoPlay
+    muted
+    loop
+    playsInline
+    preload="metadata"
+    className="block aspect-video w-full object-cover"
+  />
+)
+
+/** Section bénéfice split 50/50 façon PunCube : média + panneau sombre. */
+const BenefitSplit = ({
+  img,
+  title,
+  text,
+  reverse,
+}: {
+  img: string
+  title: string
+  text: string
+  reverse?: boolean
+}) => (
+  <div
+    className={`flex w-full flex-col md:flex-row ${
+      reverse ? "md:flex-row-reverse" : ""
+    }`}
+  >
+    <div className="relative aspect-[4/3] w-full md:aspect-auto md:min-h-[26rem] md:w-1/2">
+      {img && (
+        <Image
+          src={img}
+          alt={title}
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+        />
+      )}
+    </div>
+    <div className="flex w-full items-center bg-[#272727] px-8 py-12 text-white md:w-1/2 md:px-16">
+      <div className="max-w-md">
+        <h3 className="text-3xl font-extrabold uppercase leading-[1.05] tracking-tight md:text-4xl">
+          {title}
+        </h3>
+        <p className="mt-5 text-base leading-7 text-neutral-300">{text}</p>
+      </div>
+    </div>
+  </div>
 )
 
 const ProductStory = ({ product, images }: Props) => {
@@ -66,10 +101,10 @@ const ProductStory = ({ product, images }: Props) => {
 
   return (
     <div className="w-full">
-      {/* ---------- VIDÉO EN ACTION ---------- */}
+      {/* VIDÉO EN ACTION — pleine largeur */}
       <VideoBlock src="/produit-pub.mp4" />
 
-      {/* ---------- CHIFFRES CLÉS ---------- */}
+      {/* CHIFFRES CLÉS */}
       <section className="content-container py-10 small:py-14">
         <div className="grid grid-cols-3 gap-4">
           {STATS.map((s, i) => (
@@ -85,56 +120,29 @@ const ProductStory = ({ product, images }: Props) => {
         </div>
       </section>
 
-      {/* ---------- BÉNÉFICES ---------- */}
-      <section className="content-container pb-10 small:pb-16">
-        <div className="flex flex-col gap-12 small:gap-20">
-          {BENEFITS.map((b, i) => (
-            <div
-              key={i}
-              className={`flex flex-col gap-6 small:items-center small:gap-12 ${
-                i % 2 === 0 ? "small:flex-row" : "small:flex-row-reverse"
-              }`}
-            >
-              <div className="relative aspect-square w-full small:w-1/2 overflow-hidden rounded-2xl bg-ui-bg-subtle">
-                {pick(i + 1) && (
-                  <Image
-                    src={pick(i + 1)}
-                    alt={b.title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                )}
-              </div>
-              <div className="small:w-1/2">
-                <p className="text-xs font-semibold tracking-[0.2em] text-ui-fg-muted">
-                  {b.eyebrow}
-                </p>
-                <h3 className="mt-3 text-2xl small:text-3xl font-bold leading-tight text-ui-fg-base">
-                  {b.title}
-                </h3>
-                <p className="mt-4 text-base leading-7 text-ui-fg-subtle">
-                  {b.text}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* BÉNÉFICES — split pleine largeur façon PunCube */}
+      {BENEFITS.map((b, i) => (
+        <BenefitSplit
+          key={i}
+          img={pick(i + 1)}
+          title={b.title}
+          text={b.text}
+          reverse={i % 2 === 1}
+        />
+      ))}
 
-      {/* ---------- VIDÉO CINÉMATIQUE ---------- */}
+      {/* VIDÉO CINÉMATIQUE — pleine largeur */}
       <VideoBlock src="/produit-cinematic.mp4" />
 
-      {/* ---------- AVIS ---------- */}
+      {/* AVIS */}
       <section id="avis" className="border-t border-ui-border-base bg-ui-bg-subtle">
         <div className="content-container py-12 small:py-16">
-          <h2 className="text-2xl small:text-3xl font-bold text-ui-fg-base">
+          <h2 className="text-center text-3xl font-extrabold uppercase text-ui-fg-base">
             Avis clients
           </h2>
 
           {count === 0 ? (
-            <div className="mt-6 max-w-xl">
+            <div className="mx-auto mt-6 max-w-xl text-center">
               <p className="text-ui-fg-subtle">
                 Ce produit vient d'arriver dans la boutique. Sois le premier à
                 donner ton avis après ta commande — ton retour aide les
@@ -143,19 +151,17 @@ const ProductStory = ({ product, images }: Props) => {
             </div>
           ) : (
             <>
-              <div className="mt-6 flex flex-col gap-8 small:flex-row small:items-center">
+              <div className="mt-6 flex flex-col items-center gap-8 small:flex-row small:justify-center">
                 <div className="flex items-center gap-4">
                   <div className="text-5xl font-bold text-ui-fg-base">
                     {avg.toFixed(1)}
                   </div>
                   <div>
                     <StarRating value={avg} size={20} />
-                    <p className="mt-1 text-sm text-ui-fg-subtle">
-                      {count} avis
-                    </p>
+                    <p className="mt-1 text-sm text-ui-fg-subtle">{count} avis</p>
                   </div>
                 </div>
-                <div className="flex-1 max-w-sm">
+                <div className="w-full max-w-sm">
                   {dist.map((d) => (
                     <div key={d.star} className="flex items-center gap-2 py-0.5">
                       <span className="w-3 text-sm text-ui-fg-subtle">
