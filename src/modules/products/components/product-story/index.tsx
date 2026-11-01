@@ -2,6 +2,7 @@ import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
 import StarRating from "../star-rating"
 import Reveal from "@modules/common/components/reveal"
+import CountUp from "@modules/common/components/count-up"
 import { getReviews, reviewStats } from "@lib/reviews"
 
 type Props = {
@@ -31,32 +32,21 @@ const BENEFITS = [
 
 /** Chiffres clés HONNÊTES (faits produit réels, aucune stat client inventée). */
 const STATS = [
-  { big: "100%", label: "Anti-RFID garanti" },
-  { big: "8 j", label: "Livraison rapide" },
-  { big: "30 j", label: "Satisfait ou remboursé" },
+  { to: 100, suffix: "%", label: "Anti-RFID garanti" },
+  { to: 8, suffix: " j", label: "Livraison rapide" },
+  { to: 30, suffix: " j", label: "Satisfait ou remboursé" },
 ]
 
-/** Vidéo pleine largeur, bord à bord. */
-const VideoBlock = ({ src }: { src: string }) => (
-  <video
-    src={src}
-    autoPlay
-    muted
-    loop
-    playsInline
-    preload="metadata"
-    className="block aspect-video w-full object-cover"
-  />
-)
-
-/** Section bénéfice split 50/50 façon PunCube : média + panneau sombre. */
+/** Section bénéfice split 50/50 façon PunCube : média (image ou vidéo) + panneau sombre. */
 const BenefitSplit = ({
   img,
+  video,
   title,
   text,
   reverse,
 }: {
-  img: string
+  img?: string
+  video?: string
   title: string
   text: string
   reverse?: boolean
@@ -66,8 +56,18 @@ const BenefitSplit = ({
       reverse ? "md:flex-row-reverse" : ""
     }`}
   >
-    <div className="relative aspect-[4/3] w-full md:aspect-auto md:min-h-[26rem] md:w-1/2">
-      {img && (
+    <div className="relative aspect-[4/3] w-full bg-ui-bg-subtle md:aspect-auto md:min-h-[26rem] md:w-1/2">
+      {video ? (
+        <video
+          src={video}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : img ? (
         <Image
           src={img}
           alt={title}
@@ -76,7 +76,7 @@ const BenefitSplit = ({
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover"
         />
-      )}
+      ) : null}
     </div>
     <div className="flex w-full items-center bg-[#272727] px-8 py-12 text-white md:w-1/2 md:px-16">
       <div className="max-w-md">
@@ -102,19 +102,14 @@ const ProductStory = ({ product, images }: Props) => {
 
   return (
     <div className="w-full">
-      {/* VIDÉO EN ACTION — pleine largeur */}
-      <Reveal>
-        <VideoBlock src="/produit-pub.mp4" />
-      </Reveal>
-
-      {/* CHIFFRES CLÉS */}
+      {/* CHIFFRES CLÉS — comptage animé */}
       <section className="content-container py-10 small:py-14">
         <div className="grid grid-cols-3 gap-4">
           {STATS.map((s, i) => (
             <Reveal key={i} delay={i * 120}>
               <div className="text-center">
                 <div className="text-3xl small:text-5xl font-bold text-ui-fg-base">
-                  {s.big}
+                  <CountUp to={s.to} suffix={s.suffix} />
                 </div>
                 <div className="mt-2 text-xs small:text-sm font-semibold uppercase tracking-wide text-ui-fg-subtle">
                   {s.label}
@@ -125,22 +120,26 @@ const ProductStory = ({ product, images }: Props) => {
         </div>
       </section>
 
-      {/* BÉNÉFICES — split pleine largeur façon PunCube */}
-      {BENEFITS.map((b, i) => (
-        <Reveal key={i}>
-          <BenefitSplit
-            img={pick(i + 1)}
-            title={b.title}
-            text={b.text}
-            reverse={i % 2 === 1}
-          />
-        </Reveal>
-      ))}
-
-      {/* VIDÉO CINÉMATIQUE — pleine largeur */}
-      <Reveal>
-        <VideoBlock src="/produit-cinematic.mp4" />
-      </Reveal>
+      {/* BÉNÉFICES — split pleine largeur façon PunCube.
+          Bande 1 = vidéo pub (gauche), bande 2 = vidéo cinématique (droite). */}
+      {BENEFITS.map((b, i) => {
+        const media =
+          i === 0
+            ? { video: "/produit-pub.mp4" }
+            : i === 1
+            ? { video: "/produit-cinematic.mp4" }
+            : { img: pick(i + 1) }
+        return (
+          <Reveal key={i}>
+            <BenefitSplit
+              {...media}
+              title={b.title}
+              text={b.text}
+              reverse={i % 2 === 1}
+            />
+          </Reveal>
+        )
+      })}
 
       {/* AVIS */}
       <section id="avis" className="border-t border-ui-border-base bg-ui-bg-subtle">
