@@ -8,9 +8,7 @@ type Props = {
   images?: HttpTypes.StoreProductImage[]
 }
 
-/** Bénéfices génériques porte-cartes/portefeuille (aucune donnée inventée :
- *  ce sont les caractéristiques réelles de la gamme). Les visuels utilisent
- *  les photos du produit. */
+/** Bénéfices génériques porte-cartes/portefeuille (caractéristiques réelles). */
 const BENEFITS = [
   {
     eyebrow: "ULTRA-FIN",
@@ -34,11 +32,33 @@ const BENEFITS = [
   },
 ]
 
+/** Chiffres clés HONNÊTES (faits produit réels, aucune stat client inventée). */
+const STATS = [
+  { big: "100%", label: "Anti-RFID garanti" },
+  { big: "8 j", label: "Livraison rapide" },
+  { big: "30 j", label: "Satisfait ou remboursé" },
+]
+
+const VideoBlock = ({ src }: { src: string }) => (
+  <section className="w-full bg-black">
+    <video
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="mx-auto block aspect-video w-full max-w-5xl object-cover"
+    />
+  </section>
+)
+
 const ProductStory = ({ product, images }: Props) => {
   const imgs = (images?.length ? images : product.images || [])
     .map((i) => i.url)
     .filter(Boolean)
-  const pick = (i: number) => imgs[i % Math.max(imgs.length, 1)] || product.thumbnail || ""
+  const pick = (i: number) =>
+    imgs[i % Math.max(imgs.length, 1)] || product.thumbnail || ""
 
   const reviews = getReviews(product)
   const { count, avg, dist } = reviewStats(reviews)
@@ -46,8 +66,27 @@ const ProductStory = ({ product, images }: Props) => {
 
   return (
     <div className="w-full">
+      {/* ---------- VIDÉO EN ACTION ---------- */}
+      <VideoBlock src="/produit-pub.mp4" />
+
+      {/* ---------- CHIFFRES CLÉS ---------- */}
+      <section className="content-container py-10 small:py-14">
+        <div className="grid grid-cols-3 gap-4">
+          {STATS.map((s, i) => (
+            <div key={i} className="text-center">
+              <div className="text-3xl small:text-5xl font-bold text-ui-fg-base">
+                {s.big}
+              </div>
+              <div className="mt-2 text-xs small:text-sm font-semibold uppercase tracking-wide text-ui-fg-subtle">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ---------- BÉNÉFICES ---------- */}
-      <section className="content-container py-10 small:py-16">
+      <section className="content-container pb-10 small:pb-16">
         <div className="flex flex-col gap-12 small:gap-20">
           {BENEFITS.map((b, i) => (
             <div
@@ -83,6 +122,9 @@ const ProductStory = ({ product, images }: Props) => {
           ))}
         </div>
       </section>
+
+      {/* ---------- VIDÉO CINÉMATIQUE ---------- */}
+      <VideoBlock src="/produit-cinematic.mp4" />
 
       {/* ---------- AVIS ---------- */}
       <section id="avis" className="border-t border-ui-border-base bg-ui-bg-subtle">
